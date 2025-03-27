@@ -181,16 +181,16 @@ class DatasetImages(Dataset):
         loading_bar: tqdm.Tqdm = tqdm(total=self.nb_train + self.nb_test)
 
         #
-        self.x_train = torch.zeros( (self.nb_train, 4, 288, 432) )
+        self.x_train = torch.zeros( (self.nb_train, 3, 288, 432) )
         self.y_train = torch.zeros( (self.nb_train, 1))
-        self.x_test = torch.zeros( (self.nb_test, 4, 288, 432) )
+        self.x_test = torch.zeros( (self.nb_test, 3, 288, 432) )
         self.y_test = torch.zeros( (self.nb_test, 1))
 
         #
         for i_train in range(self.nb_train):
 
             #
-            self.x_train[i_train] = torchvision.io.read_image( self.train_images[i_train] )
+            self.x_train[i_train] = torchvision.io.read_image( self.train_images[i_train] )[:3]
             self.y_train[i_train] = self.train_labels[i_train]
 
             #
@@ -200,7 +200,7 @@ class DatasetImages(Dataset):
         for i_test in range(self.nb_test):
 
             #
-            self.x_test[i_test] = torchvision.io.read_image( self.test_images[i_test] )
+            self.x_test[i_test] = torchvision.io.read_image( self.test_images[i_test] )[:3]
             self.y_test[i_test] = self.test_labels[i_test]
 
             #
