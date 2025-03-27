@@ -15,7 +15,7 @@ model: ASTForAudioClassification = ASTForAudioClassification.from_pretrained("MI
 
 
 #
-x_train, y_train = data.get_full_train()
+x_train, y_train = data.get_batch_train(42)
 
 #
 print(f"x_train {x_train.shape} y_train {y_train.shape}")

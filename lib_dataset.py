@@ -163,8 +163,21 @@ class DatasetImages:
         #
         return self.x_test[rd_permutation], self.y_test[rd_permutation]
 
+    #
+    def get_batch_train(self, batch_size: int, random_seed: Optional[int] = None) -> tuple[Tensor, Tensor]:
 
+        #
+        rd_permutation: list[int] = get_random_perm(self.nb_train)
 
+        #
+        return self.x_train[rd_permutation[:batch_size]], self.y_train[rd_permutation[:batch_size]]
 
+    #
+    def get_batch_test(self, batch_size: int, random_seed: Optional[int] = None) -> tuple[Tensor, Tensor]:
 
+        #
+        rd_permutation: list[int] = get_random_perm(self.nb_test)
+
+        #
+        return self.x_test[rd_permutation[:batch_size]], self.y_test[rd_permutation[:batch_size]]
 
