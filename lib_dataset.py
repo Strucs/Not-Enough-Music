@@ -7,6 +7,7 @@ import random
 import torch
 from torch import Tensor
 import torchvision
+import torchaudio
 #from torchvision.io import read_image
 #
 from tqdm import tqdm
@@ -136,16 +137,16 @@ class DatasetImages(Dataset):
         print("Loading dataset")
 
         #
-        for (id_genre, genre) in enumerate(os.listdir(base_path)):
+        for (id_genre, genre) in enumerate([path for path in os.listdir(base_path) if not path.startswith(".")]):
 
             #
             genre_path: str = f"{base_path}{genre}/"
 
             #
-            imgs_files: list[str] = os.listdir(genre_path)
+            img_files: list[str] = [path for path in os.listdir(genre_path) if not path.startswith(".") and path.endswith(".png")]
 
             #
-            n: int = len(imgs_files)
+            n: int = len(img_files)
 
             #
             nb_train: int = int( self.dataset_split_ratio * n )
@@ -166,14 +167,14 @@ class DatasetImages(Dataset):
             for idx_img in rd_permutation[:nb_train]:
 
                 #
-                self.train_images.append( f"{genre_path}{imgs_files[idx_img]}" )
+                self.train_images.append( f"{genre_path}{img_files[idx_img]}" )
                 self.train_labels.append( id_genre )
 
             #
             for idx_img in rd_permutation[nb_train:]:
 
                 #
-                self.test_images.append( f"{genre_path}{imgs_files[idx_img]}" )
+                self.test_images.append( f"{genre_path}{img_files[idx_img]}" )
                 self.test_labels.append( id_genre )
 
         #
@@ -200,6 +201,122 @@ class DatasetImages(Dataset):
 
             #
             self.x_test[i_test] = torchvision.io.read_image( self.test_images[i_test] )
+            self.y_test[i_test] = self.test_labels[i_test]
+
+            #
+            loading_bar.update(1)
+
+class DatasetAudios(Dataset):
+
+    #
+    def __init__(self, dataset_split_ratio: float = 0.75, seed: Optional[int] = None) -> None:
+
+        #
+        super().__init__()
+
+        #
+        self.dataset_split_ratio: float = dataset_split_ratio
+
+        #
+        self.nb_genres: int = 10
+        self.nb_audios_per_genre: int = 100
+
+        #
+        self.nb_train_per_genre: list[int] = []
+        self.nb_test_per_genre: list[int] = []
+
+        #
+        self.train_audios: list[str] = []
+        self.train_labels: list[int] = []
+        self.test_audios: list[str] = []
+        self.test_labels: list[int] = []
+
+        #
+        self.load_dataset()
+
+    #
+    def load_dataset(self) -> None:
+
+        #
+        self.nb_train = 0
+        self.nb_test = 0
+        #
+        i_train: int = 0
+        i_test: int = 0
+
+        #
+        base_path: str = "data/genres_original/"
+
+        #
+        print("Loading dataset")
+
+        #
+        for (id_genre, genre) in enumerate([path for path in os.listdir(base_path) if not path.startswith(".")]):
+
+            #
+            genre_path: str = f"{base_path}{genre}/"
+
+            #
+            audio_files: list[str] = [path for path in os.listdir(genre_path) if not path.startswith(".") and path.endswith(".wav")]
+
+            #
+            n: int = len(audio_files)
+
+            #
+            nb_train: int = int( self.dataset_split_ratio * n )
+            nb_test: int = n - nb_train
+
+            #
+            self.nb_train += nb_train
+            self.nb_test += nb_test
+
+            #
+            self.nb_train_per_genre.append( nb_train )
+            self.nb_test_per_genre.append( nb_test )
+
+            #
+            rd_permutation = get_random_perm(n)
+
+            #
+            for idx_img in rd_permutation[:nb_train]:
+
+                #
+                self.train_audios.append( f"{genre_path}{audio_files[idx_img]}" )
+                self.train_labels.append( id_genre )
+
+            #
+            for idx_img in rd_permutation[nb_train:]:
+
+                #
+                self.test_audios.append( f"{genre_path}{audio_files[idx_img]}" )
+                self.test_labels.append( id_genre )
+
+        #
+        loading_bar: tqdm.Tqdm = tqdm(total=self.nb_train + self.nb_test)
+
+        #
+        self.x_train = torch.zeros( (self.nb_train, 675808) )
+        self.y_train = torch.zeros( (self.nb_train, 1))
+        self.x_test = torch.zeros( (self.nb_test, 675808) )
+        self.y_test = torch.zeros( (self.nb_test, 1))
+
+        #
+        for i_train in range(self.nb_train):
+
+            #
+            a, _ = torchaudio.load( self.train_audios[i_train], format="wav")
+            self.x_train[i_train][:a.shape[1]] = a[0]
+            self.y_train[i_train] = self.train_labels[i_train]
+
+            #
+            loading_bar.update(1)
+
+        #
+        for i_test in range(self.nb_test):
+
+            #
+            a, _ = torchaudio.load( self.test_audios[i_test] )
+            self.x_test[i_test][:a.shape[1]] = a[0]
             self.y_test[i_test] = self.test_labels[i_test]
 
             #
