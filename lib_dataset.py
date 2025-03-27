@@ -21,11 +21,83 @@ def get_random_perm(n: int, random_seed: Optional[int] = None) -> list[int]:
     #
     return rd_perm
 
+
 #
-class DatasetImages:
+class Dataset:
+
+    #
+    def __init__(self) -> None:
+
+        #
+        self.nb_train: int = 0
+        self.nb_test: int = 0
+
+        #
+        self.x_train: Tensor = Tensor([0])
+        self.y_train: Tensor = Tensor([0])
+        #
+        self.x_test: Tensor = Tensor([0])
+        self.y_test: Tensor = Tensor([0])
+
+    #
+    def get_full_train(self, random_seed: Optional[int] = None) -> tuple[Tensor, Tensor]:
+
+        #
+        rd_permutation: list[int] = get_random_perm(self.nb_train)
+
+        #
+        return self.x_train[rd_permutation], self.y_train[rd_permutation]
+
+    #
+    def get_full_test(self, random_seed: Optional[int] = None) -> tuple[Tensor, Tensor]:
+
+        #
+        rd_permutation: list[int] = get_random_perm(self.nb_test)
+
+        #
+        return self.x_test[rd_permutation], self.y_test[rd_permutation]
+
+    #
+    def get_batch_train(self, batch_size: int, random_seed: Optional[int] = None) -> tuple[Tensor, Tensor]:
+
+        #
+        if batch_size > self.nb_train:
+
+            #
+            raise IndexError(f"Error : batch_size (={batch_size}) > data_size (={self.nb_train})")
+
+        #
+        rd_permutation: list[int] = get_random_perm(self.nb_train)
+
+        #
+        return self.x_train[rd_permutation[:batch_size]], self.y_train[rd_permutation[:batch_size]]
+
+    #
+    def get_batch_test(self, batch_size: int, random_seed: Optional[int] = None) -> tuple[Tensor, Tensor]:
+
+        #
+        if batch_size > self.nb_test:
+
+            #
+            raise IndexError(f"Error : batch_size (={batch_size}) > data_size (={self.nb_test})")
+
+        #
+        rd_permutation: list[int] = get_random_perm(self.nb_test)
+
+        #
+        return self.x_test[rd_permutation[:batch_size]], self.y_test[rd_permutation[:batch_size]]
+
+
+
+
+#
+class DatasetImages(Dataset):
 
     #
     def __init__(self, dataset_split_ratio: float = 0.75, seed: Optional[int] = None) -> None:
+
+        #
+        super().__init__()
 
         #
         self.dataset_split_ratio: float = dataset_split_ratio
@@ -45,19 +117,7 @@ class DatasetImages:
         self.test_labels: list[int] = []
 
         #
-        self.nb_train: int = 0
-        self.nb_test: int = 0
-
-        #
-        self.x_train: Tensor = torch.zeros( (1, 4, 288, 432) )
-        self.y_train: Tensor = torch.zeros( (1, 1) )
-        #
-        self.x_test: Tensor = torch.zeros( (1, 4, 288, 432) )
-        self.y_test: Tensor = torch.zeros( (1, 1) )
-
-        #
         self.load_dataset()
-
 
     #
     def load_dataset(self) -> None:
@@ -144,40 +204,3 @@ class DatasetImages:
 
             #
             loading_bar.update(1)
-
-    #
-    def get_full_train(self, random_seed: Optional[int] = None) -> tuple[Tensor, Tensor]:
-
-        #
-        rd_permutation: list[int] = get_random_perm(self.nb_train)
-
-        #
-        return self.x_train[rd_permutation], self.y_train[rd_permutation]
-
-    #
-    def get_full_test(self, random_seed: Optional[int] = None) -> tuple[Tensor, Tensor]:
-
-        #
-        rd_permutation: list[int] = get_random_perm(self.nb_test)
-
-        #
-        return self.x_test[rd_permutation], self.y_test[rd_permutation]
-
-    #
-    def get_batch_train(self, batch_size: int, random_seed: Optional[int] = None) -> tuple[Tensor, Tensor]:
-
-        #
-        rd_permutation: list[int] = get_random_perm(self.nb_train)
-
-        #
-        return self.x_train[rd_permutation[:batch_size]], self.y_train[rd_permutation[:batch_size]]
-
-    #
-    def get_batch_test(self, batch_size: int, random_seed: Optional[int] = None) -> tuple[Tensor, Tensor]:
-
-        #
-        rd_permutation: list[int] = get_random_perm(self.nb_test)
-
-        #
-        return self.x_test[rd_permutation[:batch_size]], self.y_test[rd_permutation[:batch_size]]
-
