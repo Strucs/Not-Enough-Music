@@ -1,5 +1,6 @@
 #
 import torch
+from torch import nn
 #
 import lib_dataset as ld
 #
@@ -7,6 +8,8 @@ from matplotlib import pyplot as plt
 import numpy as np
 #
 from lib_model_ast_classification import ASTClassification
+#
+from lib_training import train_simple_epochs_loop
 
 
 #
@@ -32,23 +35,24 @@ def plot_rgb_image(image_array, title="RGB Image"):
 model: ASTClassification = ASTClassification(nb_classes = 10)
 
 #
-data: ld.DatasetAudios = ld.DatasetAudios()
+dataset: ld.DatasetAudios = ld.DatasetAudios()
 
 #
-x_train, y_train = data.get_batch_train(2)
+loss_fn: nn.Module = nn.CrossEntropyLoss()
 
 #
-print(f"x_train {x_train.shape} y_train {y_train.shape}")
-print(f"y_train = {y_train}")
-
-#
-# data = torch.transpose(torch.transpose( x_train[0], dim0=1, dim1=2 ), dim0=0, dim1=2).to(torch.int32).numpy()
-# plot_rgb_image( data )
-
-#
-with torch.no_grad():
-    #
-    outputs = model(x_train)
-
-#
-print(f"outputs = {outputs} | {outputs.shape}")
+train_simple_epochs_loop(
+    dataset = dataset,
+    model = model,
+    loss_fn = loss_fn,
+    optimizer_type = "adam",
+    optimizer_kwargs = {
+        "params": model.parameters(),
+        "lr": 0.001
+    },
+    nb_epochs = 20,
+    batch_size = -1,
+    batch_parallel_calcul = 1,
+    model_saving_folder = "model_weights/model_nathan_1/",
+    model_save_at_epochs = 1
+)
