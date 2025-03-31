@@ -1,11 +1,12 @@
 #
 import torch
-from transformers import AutoProcessor, ASTModel
 #
 import lib_dataset as ld
 #
 from matplotlib import pyplot as plt
 import numpy as np
+#
+from lib_model_ast_classification import ASTClassification
 
 
 #
@@ -26,6 +27,10 @@ def plot_rgb_image(image_array, title="RGB Image"):
     plt.axis('off')  # Turn off axis labels and ticks
     plt.show()
 
+
+#
+model: ASTClassification = ASTClassification(nb_classes = 10)
+
 #
 data: ld.DatasetAudios = ld.DatasetAudios()
 
@@ -41,29 +46,9 @@ print(f"y_train = {y_train}")
 # plot_rgb_image( data )
 
 #
-processor = AutoProcessor.from_pretrained("MIT/ast-finetuned-audioset-10-10-0.4593", use_fast=True)
-model = ASTModel.from_pretrained("MIT/ast-finetuned-audioset-10-10-0.4593")
-
-#
-# data.sampling_rate, return_tensors="pt")
-pre_inputs = [ processor(x_train[i], sampling_rate=16000, return_tensors="pt") for i in range(len(x_train)) ]
-
-#
-inputs = torch.zeros( (len(pre_inputs), 1024, 128) )
-
-#
-for i, inp in enumerate(pre_inputs):
-
-    #
-    inputs[i] = inp["input_values"][0]
-
-#
 with torch.no_grad():
     #
-    outputs = model(inputs)
+    outputs = model(x_train)
 
 #
-last_hidden_states = outputs.last_hidden_state
-
-#
-print(f"last_hidden_states = {last_hidden_states} | {last_hidden_states.shape}")
+print(f"outputs = {outputs} | {outputs.shape}")

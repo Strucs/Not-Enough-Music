@@ -174,10 +174,17 @@ cython_debug/
 .pypirc
 
 # Custom
+#
 **/*.mp3
 **/*.wav
 **/*.png
 **/*.csv
+**/*.ptb
+**/*.pyc
+#
+model_weights/
+#
+venv
 
 # OS
 **/.DS_Store
