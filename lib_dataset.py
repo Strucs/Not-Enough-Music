@@ -89,8 +89,6 @@ class Dataset:
         return self.x_test[rd_permutation[:batch_size]], self.y_test[rd_permutation[:batch_size]]
 
 
-
-
 #
 class DatasetImages(Dataset):
 
@@ -181,16 +179,16 @@ class DatasetImages(Dataset):
         loading_bar: tqdm.Tqdm = tqdm(total=self.nb_train + self.nb_test)
 
         #
-        self.x_train = torch.zeros( (self.nb_train, 3, 288, 432) )
+        self.x_train = torch.zeros( (self.nb_train, 3, 234, 216) )
         self.y_train = torch.zeros( (self.nb_train, 1))
-        self.x_test = torch.zeros( (self.nb_test, 3, 288, 432) )
+        self.x_test = torch.zeros( (self.nb_test, 3, 234, 216) )
         self.y_test = torch.zeros( (self.nb_test, 1))
 
         #
         for i_train in range(self.nb_train):
 
             #
-            self.x_train[i_train] = torchvision.io.read_image( self.train_images[i_train] )[:3]
+            self.x_train[i_train] = torchvision.io.read_image( self.train_images[i_train] )[:3, 54:388, 35:251]
             self.y_train[i_train] = self.train_labels[i_train]
 
             #
@@ -200,7 +198,7 @@ class DatasetImages(Dataset):
         for i_test in range(self.nb_test):
 
             #
-            self.x_test[i_test] = torchvision.io.read_image( self.test_images[i_test] )[:3]
+            self.x_test[i_test] = torchvision.io.read_image( self.test_images[i_test] )[:3, 54:388, 35:251]
             self.y_test[i_test] = self.test_labels[i_test]
 
             #
@@ -230,6 +228,9 @@ class DatasetAudios(Dataset):
         self.train_labels: list[int] = []
         self.test_audios: list[str] = []
         self.test_labels: list[int] = []
+
+        #
+        self.sampling_rate: int = -1
 
         #
         self.load_dataset()
@@ -304,7 +305,7 @@ class DatasetAudios(Dataset):
         for i_train in range(self.nb_train):
 
             #
-            a, _ = torchaudio.load( self.train_audios[i_train], format="wav")
+            a, self.sampling_rate = torchaudio.load( self.train_audios[i_train], format="wav")
             self.x_train[i_train][:a.shape[1]] = a[0]
             self.y_train[i_train] = self.train_labels[i_train]
 
@@ -315,7 +316,7 @@ class DatasetAudios(Dataset):
         for i_test in range(self.nb_test):
 
             #
-            a, _ = torchaudio.load( self.test_audios[i_test] )
+            a, self.sampling_rate = torchaudio.load( self.test_audios[i_test] )
             self.x_test[i_test][:a.shape[1]] = a[0]
             self.y_test[i_test] = self.test_labels[i_test]
 
