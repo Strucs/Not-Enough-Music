@@ -8,6 +8,7 @@ from transformers import AutoProcessor, ASTModel
 from lib_model_attentions import MultiHeadSelfAttention
 from lib_model_feed_forward import FeedForward
 from lib_model_transformer_block import TransformerEncoderBlock
+from lib_device import get_device
 
 
 #
@@ -87,7 +88,7 @@ class ASTClassification(nn.Module):
         pre_inputs = [ self.ast_processor(inputs[i].to("cpu"), sampling_rate=16000, return_tensors="pt") for i in range(len(inputs)) ]
 
         #
-        inputs = torch.zeros( (len(pre_inputs), 1024, 128) ).to("cuda" if torch.cuda.is_available() else "cpu")
+        inputs = torch.zeros( (len(pre_inputs), 1024, 128) ).to(get_device())
 
         #
         for i, inp in enumerate(pre_inputs):

@@ -13,7 +13,7 @@ from torch import nn
 from tqdm import tqdm
 #
 from lib_dataset import Dataset
-from lib_get_device import get_device
+from lib_device import get_device
 
 
 #

@@ -13,7 +13,7 @@ import numpy as np
 from lib_model_ast_classification import ASTClassification
 #
 from lib_training import train_simple_epochs_loop
-from calculate_accuracy import calculate_accuracy
+from lib_accuracy import calculate_accuracy
 
 
 #
