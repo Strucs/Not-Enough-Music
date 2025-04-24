@@ -84,10 +84,10 @@ class ASTClassification(nn.Module):
     def forward(self, inputs: Tensor) -> Tensor:
 
         #
-        pre_inputs = [ self.ast_processor(inputs[i], sampling_rate=16000, return_tensors="pt") for i in range(len(inputs)) ]
+        pre_inputs = [ self.ast_processor(inputs[i].to("cpu"), sampling_rate=16000, return_tensors="pt") for i in range(len(inputs)) ]
 
         #
-        inputs = torch.zeros( (len(pre_inputs), 1024, 128) )
+        inputs = torch.zeros( (len(pre_inputs), 1024, 128) ).to("cuda" if torch.cuda.is_available() else "cpu")
 
         #
         for i, inp in enumerate(pre_inputs):

@@ -112,22 +112,22 @@ def train_simple_epochs_loop(
             model.zero_grad()
 
             #
-            x_input = x_batch[ (i*batch_parallel_calcul) : ((i+1)*batch_parallel_calcul) ].to(dtype=torch.float32)
-            y_input = y_batch[ (i*batch_parallel_calcul) : ((i+1)*batch_parallel_calcul) ]
+            x_input = x_batch[ (i*batch_parallel_calcul) : ((i+1)*batch_parallel_calcul) ].to(dtype=torch.float32).to(device)
+            y_input = y_batch[ (i*batch_parallel_calcul) : ((i+1)*batch_parallel_calcul) ].to(device)
             #
             if len(y_input.shape) > 1:
                 y_input = y_input.squeeze()
             if len(list(y_input.shape)) < 1:
-                y_input = Tensor( [y_input] )
+                y_input = Tensor( [y_input] ).to(device)
 
             #
             y_input = y_input.to(dtype=torch.int64)
 
             #
-            pred: Tensor = model(x_input).to(dtype=torch.float32)
+            pred: Tensor = model(x_input).to(dtype=torch.float32).to(device)
 
             #
-            loss = loss_fn(pred, y_input)
+            loss = loss_fn(pred, y_input).to(device)
 
             #
             loss_value: float = loss.item()
