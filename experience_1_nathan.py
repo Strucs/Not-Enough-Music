@@ -54,5 +54,5 @@ train_simple_epochs_loop(
     batch_size = -1,
     batch_parallel_calcul = 1,
     model_saving_folder = "model_weights/model_nathan_1/",
-    model_save_at_epochs = 1
+    model_save_epochs_steps = 1
 )

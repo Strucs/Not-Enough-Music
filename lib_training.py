@@ -13,6 +13,7 @@ from torch import nn
 from tqdm import tqdm
 #
 from lib_dataset import Dataset
+from lib_get_device import get_device
 
 
 #
@@ -55,8 +56,8 @@ def train_simple_epochs_loop(
     batch_size: int,
     batch_parallel_calcul: int,
     model_saving_folder: str,
-    model_save_at_epochs: int = -1,
-    device: str = "cpu" if not torch.cuda.is_available() else "cuda"
+    model_save_epochs_steps: int = -1,
+    device: str = get_device()
 ) -> None:
 
     #
@@ -150,7 +151,7 @@ def train_simple_epochs_loop(
         print(f"Epoch {i+1}: loss = {loss_mean}")
 
         #
-        if model_save_at_epochs > 0 and epoch % model_save_at_epochs == 0:
+        if model_save_epochs_steps > 0 and epoch % model_save_epochs_steps == 0:
 
             #
             save_model(
