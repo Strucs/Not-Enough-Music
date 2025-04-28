@@ -1,5 +1,6 @@
 #
 import sys
+import os
 #
 import torch
 from torch import nn
@@ -10,7 +11,8 @@ from matplotlib import pyplot as plt
 import numpy as np
 #
 from lib_training import train_simple_epochs_loop
-
+#
+from lib_device import get_device
 
 #
 def plot_rgb_image(image_array, title="RGB Image"):
@@ -102,7 +104,7 @@ def load_model() -> tuple[nn.Module, ld.Dataset]:
 
         #
         print(f"Loading model from path `{model_weights_path}` ...")
-        model.load_state_dict( torch.load(model_weights_path) )
+        model.load_state_dict( torch.load(model_weights_path, map_location=get_device()) )
 
 
     #
