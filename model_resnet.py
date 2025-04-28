@@ -3,7 +3,8 @@ from torch import Tensor
 import torch.nn as nn
 import torchvision.models as models  # type: ignore
 
-# Définition du modèle CNN 1D (Adaptation d'un ResNet 2D pour classification)
+
+#
 class Resnet(nn.Module):
     def __init__(self, image_size: tuple[int, int], num_classes: int, resnet_version: str = "resnet18", pretrained: bool = True) -> None:
         """
@@ -32,10 +33,10 @@ class Resnet(nn.Module):
 
         # Replace the final fully connected layer to match the number of classes
         # Get the number of input features for the existing classifier layer
-        num_ftrs = self.resnet.fc.in_features
+        num_ftrs = self.resnet.fc.out_features
 
-        # Replace the classifier layer
-        self.resnet.fc = nn.Linear(num_ftrs, num_classes)
+        # Add classifier layer
+        self.class_lin: nn.Linear = nn.Linear(num_ftrs, num_classes)
 
         # Note: The 'image_size' parameter is not explicitly used to modify the model's
         # structure here, as standard torchvision ResNets are fully convolutional
@@ -43,7 +44,14 @@ class Resnet(nn.Module):
         # It's included in the signature as per the request and could be used for
         # input validation or specific resizing logic if needed.
 
+    #
+    def get_embedding(self, x: Tensor) -> Tensor:
 
+        #
+        return self.resnet(x)
+
+
+    #
     def forward(self, x: Tensor) -> Tensor:
         """
         Performs the forward pass through the ResNet model.
@@ -57,7 +65,11 @@ class Resnet(nn.Module):
             Tensor: The output tensor after passing through the ResNet and the final
                     classification layer. Shape is (Batch Size, num_classes).
         """
-        # The input tensor x is passed directly through the modified ResNet model
-        x = self.resnet(x)
 
+        # The input tensor x is passed directly through the modified ResNet model
+        #
+        x = self.resnet(x)
+        #
+        x = self.class_lin(x)
+        #
         return x

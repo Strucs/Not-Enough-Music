@@ -3,52 +3,13 @@ import torch
 from torch import nn
 from torch import Tensor
 #
-from transformers import AutoProcessor, ASTModel
+from transformers import AutoProcessor, ASTModel  # type: ignore
 #
-from lib_model_attentions import MultiHeadSelfAttention
 from lib_model_feed_forward import FeedForward
 from lib_model_transformer_block import TransformerEncoderBlock
+from lib_classification import ClassificationModule
 from lib_device import get_device
 
-
-#
-class ClassificationModule(nn.Module):
-
-    #
-    def __init__(self, embedding_dim: int, nb_classes: int) -> None:
-
-        #
-        super().__init__()
-
-        #
-        self.ff: FeedForward = FeedForward(
-            in_dim = embedding_dim,
-            hidden_dim = embedding_dim // 2,
-            out_dim = nb_classes
-        )
-        self.transformer_block: TransformerEncoderBlock = TransformerEncoderBlock(
-            embedding_dim = embedding_dim,
-            attention_num_head = 4,
-            hidden_dim = embedding_dim // 2
-        )
-
-        #
-        self.final_linear: nn.Linear = nn.Linear(in_features=embedding_dim, out_features=nb_classes)
-
-    #
-    def forward(self, X: Tensor) -> Tensor:
-
-        #
-        X = self.transformer_block(X)
-
-        #
-        X = torch.mean(X, dim=-2)
-
-        #
-        X = self.final_linear(X)
-
-        #
-        return X
 
 
 
@@ -82,7 +43,7 @@ class ASTClassification(nn.Module):
         )
 
     #
-    def forward(self, inputs: Tensor) -> Tensor:
+    def get_embedding(self, inputs: Tensor) -> Tensor:
 
         #
         pre_inputs = [ self.ast_processor(inputs[i].to("cpu"), sampling_rate=16000, return_tensors="pt") for i in range(len(inputs)) ]
@@ -103,7 +64,17 @@ class ASTClassification(nn.Module):
         last_hidden_states = outputs.last_hidden_state
 
         #
-        X = self.classification_module(last_hidden_states)
+        return last_hidden_states
+
+
+    #
+    def forward(self, inputs: Tensor) -> Tensor:
+
+        #
+        X = self.get_embedding(inputs)
+
+        #
+        X = self.classification_module(X)
 
         #
         return X

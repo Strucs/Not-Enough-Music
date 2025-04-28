@@ -83,6 +83,25 @@ def load_model() -> tuple[nn.Module, ld.Dataset]:
         model = Resnet(image_size = dataset.get_batch_train(1)[0].shape, num_classes = 10, resnet_version = sys.argv[1], pretrained= True)  # type: ignore
 
     #
+    elif sys.argv[1].startswith("simple_vit"):
+
+        #
+        from model_vit import SimpleVitClassifier
+
+        #
+        dataset = ld.DatasetImages()  # type: ignore
+        model = SimpleVitClassifier(image_size = dataset.get_batch_train(1)[0].shape, num_classes = 10)  # type: ignore
+
+    #
+    elif sys.argv[1].startswith("vit"):
+
+        #
+        from model_vit import VitClassifier
+
+        #
+        dataset = ld.DatasetImages()  # type: ignore
+        model = VitClassifier(image_size = dataset.get_batch_train(1)[0].shape, num_classes = 10)  # type: ignore
+    #
     else:
 
         #
