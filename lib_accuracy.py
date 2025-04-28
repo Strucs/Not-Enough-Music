@@ -290,18 +290,42 @@ def calculate_pca_embeddings(
     reduced = pca.fit_transform(embeddings)
 
     if plot:
+
         plt.figure(figsize=(8, 6))
-        scatter = plt.scatter(reduced[:, 0], reduced[:, 1], c=labels, s=10, alpha=0.7, cmap='tab10')
+        scatter = plt.scatter(
+            reduced[:, 0], reduced[:, 1],
+            c=labels, s=10, alpha=0.7, cmap='tab10'
+        )
         plt.title('PCA of Model Embeddings')
-        plt.xlabel('PC1')
-        plt.ylabel('PC2')
-        plt.colorbar(scatter, label='Class Label')
+        plt.xlabel('Principal Component 1')
+        plt.ylabel('Principal Component 2')
+
+        # Création de la légende flottante si les noms de classes sont donnés
         if class_names is not None:
-            # Ajouter une légende manuelle si class_names fourni
-            handles = [plt.Line2D([0], [0], marker='o', color='w', label=class_names[i],
-                      markerfacecolor=scatter.cmap(scatter.norm(i)), markersize=6)
-                       for i in range(len(class_names))]
-            plt.legend(title="Classes", handles=handles, bbox_to_anchor=(1.05, 1), loc='upper left')
+            unique_labels = np.unique(labels)
+            handles = []
+            for i in unique_labels:
+                color = scatter.cmap(scatter.norm(i))
+                handles.append(
+                    plt.Line2D(
+                        [0], [0],
+                        marker='o',
+                        color='w',
+                        label=class_names[i],
+                        markerfacecolor=color,
+                        markersize=8
+                    )
+                )
+            plt.legend(
+                title="Classes",
+                handles=handles,
+                bbox_to_anchor=(1.05, 1),
+                loc='upper left',
+                borderaxespad=0.
+            )
+        else:
+            plt.colorbar(scatter, label='Class Label')
+
         plt.tight_layout()
         plt.show()
 
@@ -356,18 +380,41 @@ def calculate_tsne_embeddings(
     reduced = tsne.fit_transform(embeddings)
 
     if plot:
+
         plt.figure(figsize=(8, 6))
         scatter = plt.scatter(reduced[:, 0], reduced[:, 1], c=labels, s=10, alpha=0.7, cmap='tab10')
         plt.title('t-SNE of Model Embeddings')
         plt.xlabel('Dim 1')
         plt.ylabel('Dim 2')
-        plt.colorbar(scatter, label='Class Label')
+
+        # Si class_names est fourni, créer une légende manuelle
         if class_names is not None:
-            handles = [plt.Line2D([0], [0], marker='o', color='w', label=class_names[i],
-                      markerfacecolor=scatter.cmap(scatter.norm(i)), markersize=6)
-                       for i in range(len(class_names))]
-            plt.legend(title="Classes", handles=handles, bbox_to_anchor=(1.05, 1), loc='upper left')
+            unique_labels = np.unique(labels)
+            handles = []
+            for i in unique_labels:
+                color = scatter.cmap(scatter.norm(i))
+                handles.append(
+                    plt.Line2D(
+                        [0], [0],
+                        marker='o',
+                        color='w',
+                        label=class_names[i],
+                        markerfacecolor=color,
+                        markersize=8
+                    )
+                )
+            plt.legend(
+                title="Classes",
+                handles=handles,
+                bbox_to_anchor=(1.05, 1),
+                loc='upper left',
+                borderaxespad=0.
+            )
+        else:
+            plt.colorbar(scatter, label='Class Label')
+
         plt.tight_layout()
         plt.show()
+
 
     return torch.from_numpy(reduced)
