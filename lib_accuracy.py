@@ -1,4 +1,6 @@
 #
+from typing import Optional
+#
 import torch
 from torch import Tensor
 from torch import nn
@@ -170,35 +172,19 @@ def calculate_top_k_accuracy(
 
 
 
-
-@torch.no_grad() # Disable gradient calculations for efficiency during inference
+@torch.no_grad()
 def calculate_confusion_matrix(
     dataset: Dataset,
     model: nn.Module,
-    k: int = 3, # Parameterize k for flexibility (Top-K)
-    batch_size: int = 1, # Add batch_size argument for optimization,
-    nb_classes: int = 10,   # nb classes
-    plot: bool = True   # plot the confusion matrix
+    k: int = 3,
+    batch_size: int = 1,
+    nb_classes: int = 10,
+    plot: bool = True,
+    class_names: Optional[list[str]] = None
 ) -> Tensor:
 
-    """
-    Calculates the Confusion Matrix of a model on the test set using batches.
-
-    Args:
-        dataset: An object with a 'get_full_test' method returning test features and labels.
-        model: The PyTorch model to evaluate.
-        k: The value for 'K' in Top-K accuracy (default: 3).
-        batch_size: The number of samples to process in each batch (default: 64).
-        nb_classes: int = The total number of classes for the matrix dim (default: 10)
-
-
-    Returns:
-        The calculated confusion matrix (Tensor).
-    """
-
-    model.eval() # Set the model to evaluation mode (disables dropout, batch norm updates etc.)
-
-    model = model.to( get_device() )
+    model.eval()
+    model = model.to(get_device())
 
     try:
         x_test, y_test = dataset.get_full_test()
@@ -209,53 +195,52 @@ def calculate_confusion_matrix(
         print(f"Error getting test data: {e}")
         return torch.Tensor([0])
 
-    x_test = x_test.to( get_device() )
-    y_test = y_test.to( get_device() )
+    x_test = x_test.to(get_device())
+    y_test = y_test.to(get_device())
 
     total_samples: int = len(x_test)
     if total_samples == 0:
         print("Warning: Test dataset is empty.")
         return torch.Tensor([0])
 
-    # Check if model and data are on the same device (optional but good practice)
-    # Assumes model parameters() is not empty
     device = next(model.parameters()).device
     x_test = x_test.to(device)
     y_test = y_test.to(device)
 
+    confusion_matrix: Tensor = torch.zeros((nb_classes, nb_classes), dtype=torch.int)
 
-    #
-    confusion_matrix: Tensor = torch.zeros( (nb_classes, nb_classes), dtype=torch.int )
-
-    # Iterate over batches
     for start in tqdm(range(0, total_samples, batch_size), desc="Computing Confusion Matrix"):
         end = min(start + batch_size, total_samples)
         x_batch = x_test[start:end]
         y_batch = y_test[start:end]
 
-        # Forward pass
         outputs = model(x_batch)
-        # Get top-1 predictions
         _, preds = torch.topk(outputs, 1, dim=-1)
-        preds = preds.squeeze(1)  # Shape: (batch_size,)
+        preds = preds.squeeze(1)
 
-        # Update confusion matrix
         for true_label, pred_label in zip(y_batch.view(-1), preds.view(-1)):
             confusion_matrix[true_label.long(), pred_label.long()] += 1
 
-    # Plot if requested
     if plot:
         plt.figure(figsize=(8, 6))
-        plt.imshow(confusion_matrix.cpu().numpy(), interpolation='nearest')
+        plt.imshow(confusion_matrix.cpu().numpy(), interpolation='nearest', cmap='Blues')
         plt.title('Confusion Matrix')
+        plt.colorbar()
+
+        if class_names is not None:
+            tick_marks = np.arange(len(class_names))
+            plt.xticks(tick_marks, class_names, rotation=45, ha="right")
+            plt.yticks(tick_marks, class_names)
+        else:
+            plt.xticks(np.arange(nb_classes))
+            plt.yticks(np.arange(nb_classes))
+
         plt.xlabel('Predicted Label')
         plt.ylabel('True Label')
-        plt.colorbar()
         plt.tight_layout()
         plt.show()
 
     return confusion_matrix
-
 
 
 @torch.no_grad()
@@ -263,25 +248,14 @@ def calculate_pca_embeddings(
     dataset: Dataset,
     model: nn.Module,
     batch_size: int = 64,
-    plot: bool = True
+    plot: bool = True,
+    class_names: Optional[list[str]] = None
 ) -> Tensor:
-    """
-    Computes 2D PCA on model embeddings for the test set and optionally plots them.
 
-    Args:
-        dataset: An object with a 'get_full_test' method returning test features and labels.
-        model: The PyTorch model with a 'get_embedding' method.
-        batch_size: Number of samples per batch during extraction.
-        plot: Whether to display the 2D PCA scatter.
-
-    Returns:
-        A Tensor of shape (num_samples, 2) with the PCA-reduced embeddings.
-    """
     model.eval()
     device = get_device()
     model = model.to(device)
 
-    #
     if not hasattr(model, "get_embedding"):
         print("Error: The 'model' object must have a 'get_embedding' method.")
         return torch.empty((0, 2))
@@ -294,41 +268,44 @@ def calculate_pca_embeddings(
 
     x_all = x_all.to(device)
     y_all = y_all.to(device)
+
     total_samples = len(x_all)
     if total_samples == 0:
         print("Warning: Test dataset is empty.")
         return torch.empty((0, 2))
 
-    # Extract embeddings
     embeddings = []
     labels = []
     for start in tqdm(range(0, total_samples, batch_size), desc="Extracting Embeddings for PCA"):
         end = min(start + batch_size, total_samples)
         x_batch = x_all[start:end]
-        # Assume model.get_embedding exists
-        emb_batch = model.get_embedding(x_batch)  # type: ignore
+        emb_batch = model.get_embedding(x_batch)    # type: ignore
         embeddings.append(emb_batch.cpu().numpy())
         labels.append(y_all[start:end].cpu().numpy())
 
-    embeddings = np.vstack(embeddings)  # type: ignore
+    embeddings = np.vstack(embeddings)    # type: ignore
     labels = np.concatenate(labels)
 
-    # PCA reduction
     pca = PCA(n_components=2)
     reduced = pca.fit_transform(embeddings)
 
     if plot:
         plt.figure(figsize=(8, 6))
-        plt.scatter(reduced[:, 0], reduced[:, 1], c=labels, s=10, alpha=0.7)
+        scatter = plt.scatter(reduced[:, 0], reduced[:, 1], c=labels, s=10, alpha=0.7, cmap='tab10')
         plt.title('PCA of Model Embeddings')
         plt.xlabel('PC1')
         plt.ylabel('PC2')
-        plt.colorbar(label='Class Label')
+        plt.colorbar(scatter, label='Class Label')
+        if class_names is not None:
+            # Ajouter une légende manuelle si class_names fourni
+            handles = [plt.Line2D([0], [0], marker='o', color='w', label=class_names[i],
+                      markerfacecolor=scatter.cmap(scatter.norm(i)), markersize=6)
+                       for i in range(len(class_names))]
+            plt.legend(title="Classes", handles=handles, bbox_to_anchor=(1.05, 1), loc='upper left')
         plt.tight_layout()
         plt.show()
 
     return torch.from_numpy(reduced)
-
 
 @torch.no_grad()
 def calculate_tsne_embeddings(
@@ -337,27 +314,14 @@ def calculate_tsne_embeddings(
     batch_size: int = 64,
     plot: bool = True,
     perplexity: float = 30.0,
-    learning_rate: float = 200.0
+    learning_rate: float = 200.0,
+    class_names: Optional[list[str]] = None
 ) -> Tensor:
-    """
-    Computes 2D t-SNE on model embeddings for the test set and optionally plots them.
 
-    Args:
-        dataset: An object with a 'get_full_test' method returning test features and labels.
-        model: The PyTorch model with a 'get_embedding' method.
-        batch_size: Number of samples per batch during extraction.
-        plot: Whether to display the 2D t-SNE scatter.
-        perplexity: The perplexity parameter for t-SNE.
-        learning_rate: The learning rate parameter for t-SNE.
-
-    Returns:
-        A Tensor of shape (num_samples, 2) with the t-SNE embeddings.
-    """
     model.eval()
     device = get_device()
     model = model.to(device)
 
-    #
     if not hasattr(model, "get_embedding"):
         print("Error: The 'model' object must have a 'get_embedding' method.")
         return torch.empty((0, 2))
@@ -370,35 +334,39 @@ def calculate_tsne_embeddings(
 
     x_all = x_all.to(device)
     y_all = y_all.to(device)
+
     total_samples = len(x_all)
     if total_samples == 0:
         print("Warning: Test dataset is empty.")
         return torch.empty((0, 2))
 
-    # Extract embeddings
     embeddings = []
     labels = []
     for start in tqdm(range(0, total_samples, batch_size), desc="Extracting Embeddings for t-SNE"):
         end = min(start + batch_size, total_samples)
         x_batch = x_all[start:end]
-        emb_batch = model.get_embedding(x_batch)  # type: ignore
+        emb_batch = model.get_embedding(x_batch)    # type: ignore
         embeddings.append(emb_batch.cpu().numpy())
         labels.append(y_all[start:end].cpu().numpy())
 
-    embeddings = np.vstack(embeddings)  # type: ignore
+    embeddings = np.vstack(embeddings)    # type: ignore
     labels = np.concatenate(labels)
 
-    # t-SNE reduction
     tsne = TSNE(n_components=2, perplexity=perplexity, learning_rate=learning_rate, n_iter=1000)
     reduced = tsne.fit_transform(embeddings)
 
     if plot:
         plt.figure(figsize=(8, 6))
-        plt.scatter(reduced[:, 0], reduced[:, 1], c=labels, s=10, alpha=0.7)
+        scatter = plt.scatter(reduced[:, 0], reduced[:, 1], c=labels, s=10, alpha=0.7, cmap='tab10')
         plt.title('t-SNE of Model Embeddings')
         plt.xlabel('Dim 1')
         plt.ylabel('Dim 2')
-        plt.colorbar(label='Class Label')
+        plt.colorbar(scatter, label='Class Label')
+        if class_names is not None:
+            handles = [plt.Line2D([0], [0], marker='o', color='w', label=class_names[i],
+                      markerfacecolor=scatter.cmap(scatter.norm(i)), markersize=6)
+                       for i in range(len(class_names))]
+            plt.legend(title="Classes", handles=handles, bbox_to_anchor=(1.05, 1), loc='upper left')
         plt.tight_layout()
         plt.show()
 

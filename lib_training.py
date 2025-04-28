@@ -10,7 +10,7 @@ from torch import Tensor
 from torch import optim
 from torch import nn
 #
-from tqdm import tqdm
+from tqdm import tqdm    # type: ignore
 #
 from lib_dataset import Dataset
 from lib_device import get_device
