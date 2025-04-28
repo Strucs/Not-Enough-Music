@@ -6,11 +6,11 @@ import random
 #
 import torch
 from torch import Tensor
-import torchvision
-import torchaudio
+import torchvision  # type: ignore
+import torchaudio  # type: ignore
 #from torchvision.io import read_image
 #
-from tqdm import tqdm
+from tqdm import tqdm  # type: ignore
 
 
 #

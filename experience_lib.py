@@ -57,7 +57,7 @@ def load_model() -> tuple[nn.Module, ld.Dataset]:
         #
         dataset = ld.DatasetAudios()
 
-        model = SimpleCNN1D(input_channels = len(dataset.get_batch_train(1)[0]), num_classes = 10)
+        model = SimpleCNN1D(input_channels = len(dataset.get_batch_train(1)[0]), num_classes = 10)  # type: ignore
 
         #
         print("aa")
@@ -66,11 +66,21 @@ def load_model() -> tuple[nn.Module, ld.Dataset]:
     elif sys.argv[1] == "small_conv_2":
 
         #
-        from model_angel2 import SimpleCNN1D
+        from model_angel2 import SimpleCNN1D  # type: ignore
 
         #
         dataset = ld.DatasetAudios()
-        model = SimpleCNN1D(input_channels = len(dataset.get_batch_train(1)[0]), num_classes = 10)
+        model = SimpleCNN1D(input_channels = len(dataset.get_batch_train(1)[0]), num_classes = 10)  # type: ignore
+
+    #
+    elif sys.argv[1].startswith("resnet"):
+
+        #
+        from model_resnet import Resnet
+
+        #
+        dataset = ld.DatasetImages()  # type: ignore
+        model = Resnet(image_size = dataset.get_batch_train(1)[0].shape, num_classes = 10, resnet_version = sys.argv[1], pretrained= True)  # type: ignore
 
     #
     else:
