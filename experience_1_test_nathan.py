@@ -13,7 +13,7 @@ import numpy as np
 from lib_model_ast_classification import ASTClassification
 #
 from lib_training import train_simple_epochs_loop
-from lib_accuracy import calculate_accuracy
+from lib_accuracy import calculate_accuracy, calculate_top_k_accuracy
 
 
 #
@@ -48,16 +48,16 @@ if __name__ == "__main__":
         model_weights_path = sys.argv[1]
 
     #
-    if not os.path.exists( model_weights_path ):
-
-        #
-        raise FileNotFoundError(f"Path doesn't exists : `{model_weights_path}`")
-
-    #
     model: ASTClassification = ASTClassification(nb_classes = 10)
 
     #
     if model_weights_path != "":
+
+        #
+        if not os.path.exists( model_weights_path ):
+
+            #
+            raise FileNotFoundError(f"Path doesn't exists : `{model_weights_path}`")
 
         #
         model.load_state_dict( torch.load(model_weights_path) )
@@ -66,4 +66,7 @@ if __name__ == "__main__":
     dataset: ld.DatasetAudios = ld.DatasetAudios()
 
     #
-    calculate_accuracy(dataset, model)
+    # calculate_accuracy(dataset, model)
+
+    calculate_top_k_accuracy(dataset=dataset, model=model, k=1, batch_size=1)
+    calculate_top_k_accuracy(dataset=dataset, model=model, k=3, batch_size=1)
