@@ -116,7 +116,7 @@ class DatasetImages(Dataset):
         self.test_labels: list[int] = []
 
         #
-        self.classes_names: list[str] = []
+        self.class_names: list[str] = []
 
         #
         self.load_dataset()
@@ -138,10 +138,10 @@ class DatasetImages(Dataset):
         print("Loading dataset")
 
         #
-        self.classes_names = [path for path in os.listdir(base_path) if not path.startswith(".")]
+        self.class_names = [path for path in os.listdir(base_path) if not path.startswith(".")]
 
         #
-        for (id_genre, genre) in enumerate(self.classes_names):
+        for (id_genre, genre) in enumerate(self.class_names):
 
             #
             genre_path: str = f"{base_path}{genre}/"
@@ -261,10 +261,10 @@ class DatasetAudios(Dataset):
         print("Loading dataset")
 
         #
-        self.classes_names = [path for path in os.listdir(base_path) if not path.startswith(".")]
+        self.class_names = [path for path in os.listdir(base_path) if not path.startswith(".")]
 
         #
-        for (id_genre, genre) in enumerate(self.classes_names):
+        for (id_genre, genre) in enumerate(self.class_names):
 
             #
             genre_path: str = f"{base_path}{genre}/"

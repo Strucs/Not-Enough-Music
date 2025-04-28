@@ -52,6 +52,9 @@ def main() -> None:
         class_names = dataset.class_names
 
     #
+    print(f"CLASS_NAMES = {class_names}")
+
+    #
     calculate_top_k_accuracy(dataset=dataset, model=model, k=1, batch_size=1)
     calculate_top_k_accuracy(dataset=dataset, model=model, k=3, batch_size=1)
 
