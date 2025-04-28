@@ -15,6 +15,9 @@ import numpy as np
 from lib_training import train_simple_epochs_loop
 #
 from lib_accuracy import calculate_top_k_accuracy
+from lib_accuracy import calculate_confusion_matrix
+from lib_accuracy import calculate_pca_embeddings
+from lib_accuracy import calculate_tsne_embeddings
 #
 from experience_lib import load_model
 
@@ -43,6 +46,9 @@ def main() -> None:
     calculate_top_k_accuracy(dataset=dataset, model=model, k=1, batch_size=1)
     calculate_top_k_accuracy(dataset=dataset, model=model, k=3, batch_size=1)
 
+    calculate_confusion_matrix(dataset=dataset, model=model, batch_size=1)
+    calculate_pca_embeddings(dataset=dataset, model=model, batch_size=1)
+    calculate_tsne_embeddings(dataset=dataset, model=model, batch_size=1)
 
 
 #

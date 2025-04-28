@@ -59,9 +59,6 @@ def load_model() -> tuple[nn.Module, ld.Dataset]:
 
         model = SimpleCNN1D(input_channels = len(dataset.get_batch_train(1)[0]), num_classes = 10)  # type: ignore
 
-        #
-        print("aa")
-
     #
     elif sys.argv[1] == "small_conv_2":
 
