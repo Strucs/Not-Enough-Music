@@ -32,7 +32,7 @@ def main() -> None:
     model_saving_folder: str = f"model_weights/{sys.argv[1]}/"
 
     #
-    load_model()
+    model, dataset = load_model()
 
     #
     if model is None or dataset is None:
