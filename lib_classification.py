@@ -33,13 +33,22 @@ class ClassificationModule(nn.Module):
         self.final_linear: nn.Linear = nn.Linear(in_features=embedding_dim, out_features=nb_classes)
 
     #
-    def forward(self, X: Tensor) -> Tensor:
+    def get_embedding(self, X: Tensor) -> Tensor:
 
         #
         X = self.transformer_block(X)
 
         #
         X = torch.mean(X, dim=-2)
+
+        #
+        return X
+
+    #
+    def forward(self, X: Tensor) -> Tensor:
+
+        #
+        X = self.get_embedding(X)
 
         #
         X = self.final_linear(X)

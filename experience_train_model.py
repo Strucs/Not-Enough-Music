@@ -3,6 +3,7 @@ import sys
 import os
 #
 import torch
+from torch import Tensor
 from torch import nn
 #
 import lib_dataset as ld

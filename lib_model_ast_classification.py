@@ -64,17 +64,35 @@ class ASTClassification(nn.Module):
         last_hidden_states = outputs.last_hidden_state
 
         #
-        return last_hidden_states
+        X = self.classification_module.get_embedding(last_hidden_states)
+
+        #
+        return X
 
 
     #
     def forward(self, inputs: Tensor) -> Tensor:
 
         #
-        X = self.get_embedding(inputs)
+        pre_inputs = [ self.ast_processor(inputs[i].to("cpu"), sampling_rate=16000, return_tensors="pt") for i in range(len(inputs)) ]
 
         #
-        X = self.classification_module(X)
+        inputs = torch.zeros( (len(pre_inputs), 1024, 128) ).to(get_device())
+
+        #
+        for i, inp in enumerate(pre_inputs):
+
+            #
+            inputs[i] = inp["input_values"][0]
+
+        #
+        outputs = self.ast_model(inputs)
+
+        #
+        last_hidden_states = outputs.last_hidden_state
+
+        #
+        X = self.classification_module(last_hidden_states)
 
         #
         return X

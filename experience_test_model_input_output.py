@@ -44,13 +44,13 @@ def main() -> None:
         raise UserWarning(f"model or dataset not correctly loaded...\nModel = {model}\nDataset = {dataset}")
 
     #
-    calculate_top_k_accuracy(dataset=dataset, model=model, k=1, batch_size=1)
-    calculate_top_k_accuracy(dataset=dataset, model=model, k=3, batch_size=1)
-
-    calculate_confusion_matrix(dataset=dataset, model=model, batch_size=1)
-    calculate_pca_embeddings(dataset=dataset, model=model, batch_size=1)
-    calculate_tsne_embeddings(dataset=dataset, model=model, batch_size=1)
-
+    x: Tensor
+    y: Tensor
+    x, y = dataset.get_batch_test(1)
+    print(f"model input shape : {x.shape}")
+    print(f"y shape : {y.shape}")
+    print(f"model embedding shape : {model.get_embedding(x).shape}")    # type: ignore
+    print(f"model output shape : {model(x).shape}")
 
 #
 if __name__ == "__main__":
