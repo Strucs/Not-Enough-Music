@@ -4,7 +4,7 @@ import torch.optim as optim
 import lib_dataset as ld
 from lib_training import train_simple_epochs_loop
 
-from model_angel1 import SimpleCNN1D
+from model_angel2 import SimpleCNN1D
 
 # Chargement des données
 data: ld.DatasetAudios = ld.DatasetAudios()
@@ -30,6 +30,6 @@ train_simple_epochs_loop(
     nb_epochs = 20,
     batch_size = -1,
     batch_parallel_calcul = 5,
-    model_saving_folder = "model_weights/model_legna_1/",
+    model_saving_folder = "model_weights/model_legna_2/",
     model_save_epochs_steps = 1
 )
