@@ -311,7 +311,7 @@ def calculate_pca_embeddings(
                         [0], [0],
                         marker='o',
                         color='w',
-                        label=class_names[i],
+                        label=class_names[int(i)],
                         markerfacecolor=color,
                         markersize=8
                     )
@@ -398,7 +398,7 @@ def calculate_tsne_embeddings(
                         [0], [0],
                         marker='o',
                         color='w',
-                        label=class_names[i],
+                        label=class_names[int(i)],
                         markerfacecolor=color,
                         markersize=8
                     )
