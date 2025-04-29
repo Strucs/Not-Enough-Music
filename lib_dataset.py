@@ -210,6 +210,144 @@ class DatasetImages(Dataset):
             #
             loading_bar.update(1)
 
+
+#
+class DatasetImagesFiltered(Dataset):
+
+    #
+    def __init__(self, px_height_to_keep: int, dataset_split_ratio: float = 0.75, seed: Optional[int] = None) -> None:
+
+        #
+        super().__init__()
+
+        #
+        self.px_height_to_keep: int = px_height_to_keep
+
+        #
+        self.dataset_split_ratio: float = dataset_split_ratio
+
+        #
+        self.nb_genres: int = 10
+        self.nb_imgs_per_genre: int = 100
+
+        #
+        self.nb_train_per_genre: list[int] = []
+        self.nb_test_per_genre: list[int] = []
+
+        #
+        self.train_images: list[str] = []
+        self.train_labels: list[int] = []
+        self.test_images: list[str] = []
+        self.test_labels: list[int] = []
+
+        #
+        self.class_names: list[str] = []
+
+        #
+        self.load_dataset()
+
+    #
+    def load_dataset(self) -> None:
+
+        #
+        self.nb_train = 0
+        self.nb_test = 0
+        #
+        i_train: int = 0
+        i_test: int = 0
+
+        #
+        base_path: str = "data/images_original/"
+
+        #
+        print("Loading dataset")
+
+        #
+        self.class_names = [path for path in os.listdir(base_path) if not path.startswith(".")]
+
+        #
+        for (id_genre, genre) in enumerate(self.class_names):
+
+            #
+            genre_path: str = f"{base_path}{genre}/"
+
+            #
+            img_files: list[str] = [path for path in os.listdir(genre_path) if not path.startswith(".") and path.endswith(".png")]
+
+            #
+            n: int = len(img_files)
+
+            #
+            nb_train: int = int( self.dataset_split_ratio * n )
+            nb_test: int = n - nb_train
+
+            #
+            self.nb_train += nb_train
+            self.nb_test += nb_test
+
+            #
+            self.nb_train_per_genre.append( nb_train )
+            self.nb_test_per_genre.append( nb_test )
+
+            #
+            rd_permutation = get_random_perm(n)
+
+            #
+            for idx_img in rd_permutation[:nb_train]:
+
+                #
+                self.train_images.append( f"{genre_path}{img_files[idx_img]}" )
+                self.train_labels.append( id_genre )
+
+            #
+            for idx_img in rd_permutation[nb_train:]:
+
+                #
+                self.test_images.append( f"{genre_path}{img_files[idx_img]}" )
+                self.test_labels.append( id_genre )
+
+        #
+        loading_bar: tqdm.Tqdm = tqdm(total=self.nb_train + self.nb_test)
+
+        #
+        bxt: int = 388
+        byt: int = 251
+        bx: int = 54
+        by: int = 35
+        by = 251 - self.px_height_to_keep
+
+        w: int = bxt - bx
+        h: int = byt - by
+
+        #
+        self.x_train = torch.zeros( (self.nb_train, 3, w, h) )
+        self.y_train = torch.zeros( (self.nb_train, 1))
+        self.x_test = torch.zeros( (self.nb_test, 3, w, h) )
+        self.y_test = torch.zeros( (self.nb_test, 1))
+
+        #
+        for i_train in range(self.nb_train):
+
+            #
+            self.x_train[i_train] = torchvision.io.read_image( self.train_images[i_train] )[:3, bx:bxt, by:byt]
+            self.y_train[i_train] = self.train_labels[i_train]
+
+            #
+            loading_bar.update(1)
+
+        #
+        for i_test in range(self.nb_test):
+
+            #
+            self.x_test[i_test] = torchvision.io.read_image( self.test_images[i_test] )[:3, 54:388, 35:251]
+            self.y_test[i_test] = self.test_labels[i_test]
+
+            #
+            loading_bar.update(1)
+
+
+
+
 class DatasetAudios(Dataset):
 
     #

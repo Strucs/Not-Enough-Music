@@ -2,6 +2,7 @@
 from typing import Callable
 #
 import os
+import json
 #
 from datetime import datetime
 #
@@ -23,7 +24,7 @@ OPTIMIZERS: dict[str, Callable] = {
 
 
 #
-def save_model(model: nn.Module, folder_path: str, additional_txt: str) -> None:
+def save_model(model: nn.Module, folder_path: str, additional_txt: str) -> str:
 
     #
     if not os.path.exists(folder_path):
@@ -43,6 +44,9 @@ def save_model(model: nn.Module, folder_path: str, additional_txt: str) -> None:
     #
     print(f"Model weights saved at : `{model_save_path}`")
 
+    #
+    return model_save_path
+
 
 
 #
@@ -58,7 +62,7 @@ def train_simple_epochs_loop(
     model_saving_folder: str,
     model_save_epochs_steps: int = -1,
     device: str = get_device()
-) -> None:
+) -> dict[str, list[float]]:
 
     #
     model = model.to(device)
@@ -161,8 +165,17 @@ def train_simple_epochs_loop(
             )
 
     #
-    save_model(
+    model_save_path: str = save_model(
         model=model,
         folder_path=model_saving_folder,
         additional_txt=""
     )
+
+    #
+    with open(model_save_path + f"_loss_.json", "w", encoding="utf-8") as f:
+
+        #
+        json.dump( history, f )
+
+    #
+    return history
