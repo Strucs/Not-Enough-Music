@@ -116,7 +116,7 @@ def main() -> None:
 
 
         print(f"Loading model from path `{base_path}{model_file_path}` ...")
-        model.load_state_dict( torch.load(f"{base_path}{model_file_path}", map_location="cpu") )
+        model.load_state_dict( torch.load(f"{base_path}{model_file_path}") )
         model = model.to( get_device() )
 
         #
