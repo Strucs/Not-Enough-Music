@@ -180,7 +180,8 @@ def calculate_confusion_matrix(
     batch_size: int = 1,
     nb_classes: int = 10,
     plot: bool = True,
-    class_names: Optional[list[str]] = None
+    class_names: Optional[list[str]] = None,
+    save_plot: Optional[str] = None
 ) -> Tensor:
 
     model.eval()
@@ -238,7 +239,13 @@ def calculate_confusion_matrix(
         plt.xlabel('Predicted Label')
         plt.ylabel('True Label')
         plt.tight_layout()
-        plt.show()
+
+        #
+        if save_plot is not None:
+            plt.savefig(save_plot)
+        #
+        else:
+            plt.show()
 
     return confusion_matrix
 
@@ -249,7 +256,8 @@ def calculate_pca_embeddings(
     model: nn.Module,
     batch_size: int = 64,
     plot: bool = True,
-    class_names: Optional[list[str]] = None
+    class_names: Optional[list[str]] = None,
+    save_plot: Optional[str] = None
 ) -> Tensor:
 
     model.eval()
@@ -326,8 +334,15 @@ def calculate_pca_embeddings(
         else:
             plt.colorbar(scatter, label='Class Label')
 
+        #
         plt.tight_layout()
-        plt.show()
+
+        #
+        if save_plot is not None:
+            plt.savefig(save_plot)
+        #
+        else:
+            plt.show()
 
     return torch.from_numpy(reduced)
 
@@ -339,7 +354,8 @@ def calculate_tsne_embeddings(
     plot: bool = True,
     perplexity: float = 30.0,
     learning_rate: float = 200.0,
-    class_names: Optional[list[str]] = None
+    class_names: Optional[list[str]] = None,
+    save_plot: Optional[str] = None
 ) -> Tensor:
 
     model.eval()
@@ -413,8 +429,15 @@ def calculate_tsne_embeddings(
         else:
             plt.colorbar(scatter, label='Class Label')
 
+        #
         plt.tight_layout()
-        plt.show()
+
+        #
+        if save_plot is not None:
+            plt.savefig(save_plot)
+        #
+        else:
+            plt.show()
 
 
     return torch.from_numpy(reduced)

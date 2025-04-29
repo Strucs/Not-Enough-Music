@@ -1,6 +1,7 @@
 #
 import sys
 import os
+import random
 #
 import torch
 from torch import Tensor
@@ -17,6 +18,14 @@ from experience_lib import load_model
 #
 import lib_loss as ll
 
+
+
+
+# Random Seed at file level
+random_seed = 42
+
+np.random.seed(random_seed)
+random.seed(random_seed)
 
 
 #

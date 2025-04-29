@@ -3,6 +3,7 @@ from typing import Optional
 #
 import sys
 import os
+import random
 #
 import torch
 from torch import Tensor
@@ -21,6 +22,16 @@ from lib_accuracy import calculate_pca_embeddings
 from lib_accuracy import calculate_tsne_embeddings
 #
 from experience_lib import load_model
+
+
+
+
+# Random Seed at file level
+random_seed = 42
+
+np.random.seed(random_seed)
+random.seed(random_seed)
+
 
 
 #
