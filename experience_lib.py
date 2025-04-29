@@ -14,23 +14,6 @@ from lib_training import train_simple_epochs_loop
 #
 from lib_device import get_device
 
-#
-def plot_rgb_image(image_array, title="RGB Image"):
-    """
-    Plots an RGB image represented as a NumPy array.
-
-    Args:
-        image_array: A NumPy array of shape (height, width, 3) representing the RGB image.
-        title: Title of the plot.
-    """
-
-    if image_array.ndim != 3 or image_array.shape[2] != 3:
-        raise ValueError("Image array must have shape (height, width, 3) for RGB.")
-
-    plt.imshow(image_array)
-    plt.title(title)
-    plt.axis('off')  # Turn off axis labels and ticks
-    plt.show()
 
 
 
@@ -77,7 +60,7 @@ def load_model() -> tuple[nn.Module, ld.Dataset]:
 
         #
         # dataset = ld.DatasetImages()  # type: ignore
-        dataset = ld.DatasetImagesFiltered(px_height_to_keep = 18 * 3)  # type: ignore
+        dataset = ld.DatasetImagesFiltered(px_height_to_keep = 18 * 1)  # type: ignore
         #
         model = Resnet(image_size = dataset.get_batch_train(1)[0].shape, num_classes = 10, resnet_version = sys.argv[1], pretrained= True)  # type: ignore
 
@@ -89,7 +72,7 @@ def load_model() -> tuple[nn.Module, ld.Dataset]:
 
         #
         # dataset = ld.DatasetImages()  # type: ignore
-        dataset = ld.DatasetImagesFiltered(px_height_to_keep = 18 * 3)  # type: ignore
+        dataset = ld.DatasetImagesFiltered(px_height_to_keep = 18 * 3, divisible_per = 18)  # type: ignore
         #
         model = SimpleVitClassifier(image_size = dataset.get_batch_train(1)[0].shape, num_classes = 10)  # type: ignore
 
@@ -101,7 +84,7 @@ def load_model() -> tuple[nn.Module, ld.Dataset]:
 
         #
         # dataset = ld.DatasetImages()  # type: ignore
-        dataset = ld.DatasetImagesFiltered(px_height_to_keep = 18 * 3)  # type: ignore
+        dataset = ld.DatasetImagesFiltered(px_height_to_keep = 18 * 3, divisible_per = 18)  # type: ignore
         #
         model = VitClassifier(image_size = dataset.get_batch_train(1)[0].shape, num_classes = 10)  # type: ignore
 

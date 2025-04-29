@@ -12,6 +12,8 @@ import torchaudio  # type: ignore
 #
 from tqdm import tqdm  # type: ignore
 
+#
+from lib_plot import plot_rgb_image
 
 #
 def get_random_perm(n: int, random_seed: Optional[int] = None) -> list[int]:
@@ -215,13 +217,14 @@ class DatasetImages(Dataset):
 class DatasetImagesFiltered(Dataset):
 
     #
-    def __init__(self, px_height_to_keep: int, dataset_split_ratio: float = 0.75, seed: Optional[int] = None) -> None:
+    def __init__(self, px_height_to_keep: int, divisible_per: int = 18, dataset_split_ratio: float = 0.75, seed: Optional[int] = None) -> None:
 
         #
         super().__init__()
 
         #
         self.px_height_to_keep: int = px_height_to_keep
+        self.divisible_per: int = divisible_per
 
         #
         self.dataset_split_ratio: float = dataset_split_ratio
@@ -310,27 +313,46 @@ class DatasetImagesFiltered(Dataset):
         loading_bar: tqdm.Tqdm = tqdm(total=self.nb_train + self.nb_test)
 
         #
-        bxt: int = 388
-        byt: int = 251
-        bx: int = 54
-        by: int = 35
-        by = 251 - self.px_height_to_keep
+        byt: int = 388
+        bxt: int = 251
+        by: int = 54
+        bx: int = 35
+        # by = byt - self.px_height_to_keep
+        bx = bxt - self.px_height_to_keep
+
+        bxt -= (bxt - bx) % self.divisible_per
+        byt -= (byt - by) % self.divisible_per
 
         w: int = bxt - bx
         h: int = byt - by
 
         #
-        self.x_train = torch.zeros( (self.nb_train, 3, w, h) )
-        self.y_train = torch.zeros( (self.nb_train, 1))
-        self.x_test = torch.zeros( (self.nb_test, 3, w, h) )
-        self.y_test = torch.zeros( (self.nb_test, 1))
+        # print(f"DEBUG | w = {w} | h = {h} | bx = {bx} | bxt = {bxt} | by = {by} | byt = {byt}")
+
+        #
+        self.x_train = torch.zeros( (self.nb_train, 3, w, h), dtype=torch.float32 )
+        self.y_train = torch.zeros( (self.nb_train, 1), dtype=torch.float32)
+        self.x_test = torch.zeros( (self.nb_test, 3, w, h), dtype=torch.float32 )
+        self.y_test = torch.zeros( (self.nb_test, 1), dtype=torch.float32)
 
         #
         for i_train in range(self.nb_train):
 
             #
-            self.x_train[i_train] = torchvision.io.read_image( self.train_images[i_train] )[:3, bx:bxt, by:byt]
+            img = torchvision.io.read_image( self.train_images[i_train] )
+
+            #
+            # print(f"DEBUG | {img.shape}")
+
+            #
+            # plot_rgb_image(img[:3, :, :].permute(1, 2, 0).numpy())
+
+            #
+            self.x_train[i_train] = img[:3, bx:bxt, by:byt] / 255.0
             self.y_train[i_train] = self.train_labels[i_train]
+
+            #
+            # plot_rgb_image(self.x_train[i_train].permute(1, 2, 0).numpy())
 
             #
             loading_bar.update(1)
@@ -339,7 +361,7 @@ class DatasetImagesFiltered(Dataset):
         for i_test in range(self.nb_test):
 
             #
-            self.x_test[i_test] = torchvision.io.read_image( self.test_images[i_test] )[:3, 54:388, 35:251]
+            self.x_test[i_test] = torchvision.io.read_image( self.test_images[i_test] )[:3, bx:bxt, by:byt] / 255.0
             self.y_test[i_test] = self.test_labels[i_test]
 
             #
