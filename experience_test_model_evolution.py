@@ -113,6 +113,10 @@ def main() -> None:
         #
         print(f"\nEpoch {id_epoch}\n")
 
+
+        print(f"Loading model from path `{model_file_path}` ...")
+        model.load_state_dict( torch.load(model_file_path, map_location="cpu") ).to( get_device() )
+
         #
         top_1_acc[id_epoch] = calculate_top_k_accuracy(dataset=dataset, model=model, k=1, batch_size=1)
         top_3_acc[id_epoch] = calculate_top_k_accuracy(dataset=dataset, model=model, k=3, batch_size=1)
