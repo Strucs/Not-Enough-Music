@@ -108,15 +108,15 @@ def main() -> None:
         prefix: str = "weights_"
 
         #
-        if not model_file_path.startswith(prefix): return
+        if not model_file_path.startswith(prefix): continue
         #
-        if not model_file_path.endswith(".pth"): return
+        if not model_file_path.endswith(".pth"): continue
 
         #
         i: int = model_file_path.find("__")
 
         #
-        if i == -1: return
+        if i == -1: continue
 
         #
         id_epoch: int = int( model_file_path[len(prefix):i] )
