@@ -60,7 +60,7 @@ def load_model() -> tuple[nn.Module, ld.Dataset]:
 
         #
         # dataset = ld.DatasetImages()  # type: ignore
-        dataset = ld.DatasetImagesFiltered(px_height_to_keep = 18 * 1)  # type: ignore
+        dataset = ld.DatasetImagesFiltered(px_height_to_keep = -1)  # type: ignore
         #
         model = Resnet(image_size = dataset.get_batch_train(1)[0].shape, num_classes = 10, resnet_version = sys.argv[1], pretrained= True)  # type: ignore
 
@@ -72,7 +72,7 @@ def load_model() -> tuple[nn.Module, ld.Dataset]:
 
         #
         # dataset = ld.DatasetImages()  # type: ignore
-        dataset = ld.DatasetImagesFiltered(px_height_to_keep = 18 * 3, divisible_per = 18)  # type: ignore
+        dataset = ld.DatasetImagesFiltered(px_height_to_keep = -1, divisible_per = 64)  # type: ignore
         #
         model = SimpleVitClassifier(image_size = dataset.get_batch_train(1)[0].shape, num_classes = 10)  # type: ignore
 
@@ -84,7 +84,7 @@ def load_model() -> tuple[nn.Module, ld.Dataset]:
 
         #
         # dataset = ld.DatasetImages()  # type: ignore
-        dataset = ld.DatasetImagesFiltered(px_height_to_keep = 18 * 3, divisible_per = 18)  # type: ignore
+        dataset = ld.DatasetImagesFiltered(px_height_to_keep = -1, divisible_per = 64)  # type: ignore
         #
         model = VitClassifier(image_size = dataset.get_batch_train(1)[0].shape, num_classes = 10)  # type: ignore
 

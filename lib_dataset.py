@@ -318,7 +318,11 @@ class DatasetImagesFiltered(Dataset):
         by: int = 54
         bx: int = 35
         # by = byt - self.px_height_to_keep
-        bx = bxt - self.px_height_to_keep
+
+        #
+        if self.px_height_to_keep > 0:
+
+            bx = bxt - self.px_height_to_keep
 
         bxt -= (bxt - bx) % self.divisible_per
         byt -= (byt - by) % self.divisible_per
