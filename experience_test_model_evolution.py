@@ -114,8 +114,8 @@ def main() -> None:
         print(f"\nEpoch {id_epoch}\n")
 
 
-        print(f"Loading model from path `{model_file_path}` ...")
-        model.load_state_dict( torch.load(model_file_path, map_location="cpu") ).to( get_device() )
+        print(f"Loading model from path `{base_path}{model_file_path}` ...")
+        model.load_state_dict( torch.load(f"{base_path}{model_file_path}", map_location="cpu") ).to( get_device() )
 
         #
         top_1_acc[id_epoch] = calculate_top_k_accuracy(dataset=dataset, model=model, k=1, batch_size=1)
@@ -128,12 +128,12 @@ def main() -> None:
     #
     plt.clf()
     plt.plot( list(top_1_acc.keys()), list(top_1_acc.values()) )
-    plt.savefig( f"{base_path}top_1_acc.png" )
+    plt.savefig( f"{base_ev}top_1_acc.png" )
 
     #
     plt.clf()
     plt.plot( list(top_3_acc.keys()), list(top_3_acc.values()) )
-    plt.savefig( f"{base_path}top_3_acc.png" )
+    plt.savefig( f"{base_ev}top_3_acc.png" )
 
 
 #
