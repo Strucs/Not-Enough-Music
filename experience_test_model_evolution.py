@@ -115,7 +115,8 @@ def main() -> None:
 
 
         print(f"Loading model from path `{base_path}{model_file_path}` ...")
-        model.load_state_dict( torch.load(f"{base_path}{model_file_path}", map_location="cpu") ).to( get_device() )
+        model.load_state_dict( torch.load(f"{base_path}{model_file_path}", map_location="cpu") )
+        model = model.to( get_device() )
 
         #
         top_1_acc[id_epoch] = calculate_top_k_accuracy(dataset=dataset, model=model, k=1, batch_size=1)
