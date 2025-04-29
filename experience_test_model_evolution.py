@@ -99,8 +99,13 @@ def main() -> None:
     #
     for model_file_path in os.listdir( base_path ):
 
+        print(f"{model_file_path} ?")
+
         #
-        if not model_file_path.startswith("weights_"): return
+        prefix: str = "weights_"
+
+        #
+        if not model_file_path.startswith(prefix): return
         #
         if not model_file_path.endswith(".pth"): return
 
@@ -111,7 +116,7 @@ def main() -> None:
         if i == -1: return
 
         #
-        id_epoch: int = int( model_file_path[len("weights_"):i] )
+        id_epoch: int = int( model_file_path[len(prefix):i] )
 
         #
         print(f"\nEpoch {id_epoch}\n")
