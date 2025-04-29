@@ -14,6 +14,8 @@ import numpy as np
 from lib_training import train_simple_epochs_loop
 #
 from experience_lib import load_model
+#
+import lib_loss as ll
 
 
 
@@ -42,6 +44,8 @@ def main() -> None:
 
     #
     loss_fn: nn.Module = nn.CrossEntropyLoss()
+
+    loss_fn = ll.FocalLoss(gamma = 2)
 
     #
     train_simple_epochs_loop(
