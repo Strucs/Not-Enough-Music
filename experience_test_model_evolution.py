@@ -97,6 +97,9 @@ def main() -> None:
     top_3_acc: dict[int, float] = {}
 
     #
+    print(f"os.listdir( base_path ) = {os.listdir( base_path )}")
+
+    #
     for model_file_path in os.listdir( base_path ):
 
         print(f"{model_file_path} ?")
