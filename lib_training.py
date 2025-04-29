@@ -39,7 +39,13 @@ def save_model(model: nn.Module, folder_path: str, additional_txt: str) -> str:
     model_save_path: str = f"{folder_path}weights_{len(os.listdir(folder_path))}_{additional_txt}_{currentTime}.pth"
 
     #
+    model = model.to("cpu")
+
+    #
     torch.save(model.state_dict(), model_save_path)
+
+    #
+    model = model.to(get_device())
 
     #
     print(f"Model weights saved at : `{model_save_path}`")
