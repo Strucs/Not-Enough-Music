@@ -101,6 +101,8 @@ def main() -> None:
 
         #
         if not model_file_path.startswith("weights_"): return
+        #
+        if not model_file_path.endswith(".pth"): return
 
         #
         i: int = model_file_path.find("__")
@@ -116,7 +118,7 @@ def main() -> None:
 
 
         print(f"Loading model from path `{base_path}{model_file_path}` ...")
-        model.load_state_dict( torch.load(f"{base_path}{model_file_path}") )
+        model.load_state_dict( torch.load(f"{base_path}{model_file_path}", map_location="cpu") )
         model = model.to( get_device() )
 
         #
