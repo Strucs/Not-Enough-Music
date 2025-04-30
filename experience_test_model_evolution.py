@@ -97,11 +97,12 @@ def main() -> None:
     top_3_acc: dict[int, float] = {}
 
     #
-    print(f"os.listdir( base_path ) = {os.listdir( base_path )}")
+    paths: list[str] = os.listdir( base_path )
+    paths_epoch: dict[int, str] = {}
 
     #
-    for model_file_path in os.listdir( base_path ):
-
+    for model_file_path in paths:
+        #
         print(f"{model_file_path} ?")
 
         #
@@ -120,6 +121,22 @@ def main() -> None:
 
         #
         id_epoch: int = int( model_file_path[len(prefix):i] )
+
+        #
+        paths_epoch[id_epoch] = model_file_path
+
+
+    #
+    sorted_keys: list[int] = sorted(paths_epoch.keys())
+
+    #
+    paths_epoch = {i: paths_epoch[i] for i in sorted_keys}
+
+    #
+    print(f"os.listdir( base_path ) = {paths}")
+
+    #
+    for id_epoch, model_file_path in paths_epoch.items():
 
         #
         print(f"\nEpoch {id_epoch}\n")

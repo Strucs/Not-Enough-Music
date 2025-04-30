@@ -19,3 +19,4 @@ def plot_rgb_image(image_array, title="RGB Image"):
     plt.title(title)
     plt.axis('off')  # Turn off axis labels and ticks
     plt.show()
+    plt.close()

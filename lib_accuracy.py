@@ -247,6 +247,9 @@ def calculate_confusion_matrix(
         else:
             plt.show()
 
+        #
+        plt.close()
+
     return confusion_matrix
 
 
@@ -344,6 +347,9 @@ def calculate_pca_embeddings(
         else:
             plt.show()
 
+        #
+        plt.close()
+
     return torch.from_numpy(reduced)
 
 @torch.no_grad()
@@ -392,7 +398,7 @@ def calculate_tsne_embeddings(
     embeddings = np.vstack(embeddings)    # type: ignore
     labels = np.concatenate(labels)
 
-    tsne = TSNE(n_components=2, perplexity=perplexity, learning_rate=learning_rate, n_iter=1000)
+    tsne = TSNE(n_components=2, perplexity=perplexity, learning_rate=learning_rate, max_iter=1000)
     reduced = tsne.fit_transform(embeddings)
 
     if plot:
@@ -438,6 +444,9 @@ def calculate_tsne_embeddings(
         #
         else:
             plt.show()
+
+        #
+        plt.close()
 
 
     return torch.from_numpy(reduced)
