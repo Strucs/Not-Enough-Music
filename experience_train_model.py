@@ -66,7 +66,7 @@ def main() -> None:
             "params": model.parameters(),
             "lr": 0.001
         },
-        nb_epochs = 20,
+        nb_epochs = 100,
         batch_size = -1,
         batch_parallel_calcul = 1,
         model_saving_folder = model_saving_folder,
