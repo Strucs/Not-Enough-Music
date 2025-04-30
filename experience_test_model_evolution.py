@@ -133,18 +133,25 @@ def main() -> None:
         top_1_acc[id_epoch] = calculate_top_k_accuracy(dataset=dataset, model=model, k=1, batch_size=1)
         top_3_acc[id_epoch] = calculate_top_k_accuracy(dataset=dataset, model=model, k=3, batch_size=1)
 
-        calculate_confusion_matrix(dataset=dataset, model=model, batch_size=1, class_names=class_names, save_plot=f"{base_ev_conf_matr}{id_epoch}.png")
-        calculate_pca_embeddings(dataset=dataset, model=model, batch_size=1, class_names=class_names, save_plot=f"{base_ev_pca}{id_epoch}.png")
-        calculate_tsne_embeddings(dataset=dataset, model=model, batch_size=1, class_names=class_names, save_plot=f"{base_ev_tsne}{id_epoch}.png")
+        #
+        ee = "0" * ( (4 - len(str(id_epoch))) ) + str(id_epoch)
+
+        calculate_confusion_matrix(dataset=dataset, model=model, batch_size=1, class_names=class_names, save_plot=f"{base_ev_conf_matr}{ee}.png")
+        calculate_pca_embeddings(dataset=dataset, model=model, batch_size=1, class_names=class_names, save_plot=f"{base_ev_pca}{ee}.png")
+        calculate_tsne_embeddings(dataset=dataset, model=model, batch_size=1, class_names=class_names, save_plot=f"{base_ev_tsne}{ee}.png")
+
+    #
+    top_1_acc = dict(sorted(top_1_acc.items(), key=lambda item: item[1]))
+    top_3_acc = dict(sorted(top_3_acc.items(), key=lambda item: item[1]))
 
     #
     plt.clf()
-    plt.plot( list(top_1_acc.keys()), list(top_1_acc.values()) )
+    plt.plot(list(top_1_acc.values()) )
     plt.savefig( f"{base_ev}top_1_acc.png" )
 
     #
     plt.clf()
-    plt.plot( list(top_3_acc.keys()), list(top_3_acc.values()) )
+    plt.plot( list(top_3_acc.values()) )
     plt.savefig( f"{base_ev}top_3_acc.png" )
 
 
