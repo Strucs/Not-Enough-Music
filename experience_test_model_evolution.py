@@ -153,13 +153,13 @@ def main() -> None:
         #
         ee = "0" * ( (4 - len(str(id_epoch))) ) + str(id_epoch)
 
-        calculate_confusion_matrix(dataset=dataset, model=model, batch_size=1, class_names=class_names, save_plot=f"{base_ev_conf_matr}{ee}.png")
-        calculate_pca_embeddings(dataset=dataset, model=model, batch_size=1, class_names=class_names, save_plot=f"{base_ev_pca}{ee}.png")
-        calculate_tsne_embeddings(dataset=dataset, model=model, batch_size=1, class_names=class_names, save_plot=f"{base_ev_tsne}{ee}.png")
+        # calculate_confusion_matrix(dataset=dataset, model=model, batch_size=1, class_names=class_names, save_plot=f"{base_ev_conf_matr}{ee}.png")
+        # calculate_pca_embeddings(dataset=dataset, model=model, batch_size=1, class_names=class_names, save_plot=f"{base_ev_pca}{ee}.png")
+        # calculate_tsne_embeddings(dataset=dataset, model=model, batch_size=1, class_names=class_names, save_plot=f"{base_ev_tsne}{ee}.png")
 
     #
-    top_1_acc = dict(sorted(top_1_acc.items(), key=lambda item: item[1]))
-    top_3_acc = dict(sorted(top_3_acc.items(), key=lambda item: item[1]))
+    top_1_acc = dict(sorted(top_1_acc.items(), key=lambda item: item[0]))
+    top_3_acc = dict(sorted(top_3_acc.items(), key=lambda item: item[0]))
 
     #
     plt.clf()
