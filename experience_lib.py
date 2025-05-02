@@ -140,9 +140,6 @@ def load_model(model_name: str, model_weights_path: str = "") -> nn.Module:
         raise UserWarning(f"model not correctly loaded...\nModel = {model}")
 
     #
-    model_weights_path: str = ""
-
-    #
     if model_weights_path != "":
 
         #
