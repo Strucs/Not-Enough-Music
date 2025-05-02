@@ -524,9 +524,9 @@ def create_audio2vec_signal_dataset(in_dataset: DatasetAudios = DatasetAudios(),
 
     #
     result_dataset.x_test = torch.zeros( (nb_test, dim_x), dtype=dtype ).to( get_device() )
-    result_dataset.y_test = torch.zeros( (nb_test, 2), dtype=torch.int ).to( "cpu" )
+    result_dataset.y_test = torch.zeros( (nb_test, 1), dtype=torch.int ).to( "cpu" )
     result_dataset.x_train = torch.zeros( (nb_train, dim_x), dtype=dtype ).to( get_device() )
-    result_dataset.y_train = torch.zeros( (nb_train, 2), dtype=torch.int ).to( "cpu" )
+    result_dataset.y_train = torch.zeros( (nb_train, 1), dtype=torch.int ).to( "cpu" )
     #
     result_dataset.nb_train = nb_train
     result_dataset.nb_test = nb_test
@@ -650,9 +650,9 @@ def create_audio2vec_img_dataset(in_dataset: DatasetImages | DatasetImagesFilter
 
     #
     result_dataset.x_test = torch.zeros( (nb_test, dim_x, dim_y, dim_c), dtype=dtype ).to( get_device() )
-    result_dataset.y_test = torch.zeros( (nb_test, 2), dtype=torch.int ).to( "cpu" )
+    result_dataset.y_test = torch.zeros( (nb_test, 1), dtype=torch.int ).to( "cpu" )
     result_dataset.x_train = torch.zeros( (nb_train, dim_x, dim_y, dim_c), dtype=dtype ).to( get_device() )
-    result_dataset.y_train = torch.zeros( (nb_train, 2), dtype=torch.int ).to( "cpu" )
+    result_dataset.y_train = torch.zeros( (nb_train, 1), dtype=torch.int ).to( "cpu" )
     #
     result_dataset.nb_train = nb_train
     result_dataset.nb_test = nb_test
