@@ -53,7 +53,10 @@ def main() -> None:
     if sys.argv[1].startswith("pre_train_"):
 
         #
-        for _ in range(10):
+        for j in range(30):
+
+            #
+            print(f"\n\nTRAINING PART {j}\n\n")
 
             #
             crt_dataset: ld.Dataset = load_dataset(model_name = sys.argv[1], give_train_dataset=True, from_dataset = dataset)
@@ -74,6 +77,9 @@ def main() -> None:
                 model_saving_folder = model_saving_folder,
                 model_save_epochs_steps = 1
             )
+
+            #
+            del crt_dataset
 
     else:
 

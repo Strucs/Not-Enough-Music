@@ -62,7 +62,7 @@ class VitClassifier(nn.Module):
 
 #
 class SimpleVitClassifier(nn.Module):
-    def __init__(self, image_size: tuple[int, int], num_classes: int) -> None:
+    def __init__(self, num_classes: int, image_size: tuple[int, int] = (192, 320)) -> None:
 
         super().__init__()
 

@@ -559,8 +559,8 @@ def create_audio2vec_signal_dataset(in_dataset: DatasetAudios, prob_self: float 
             dx1 = int( dim_x * p )
             dx2 = dim_x - dx1
             #
-            result_dataset.x_train[i][0: dx1] = X1[0: dx1]
-            result_dataset.x_train[i][dx1: dx1+dx2] = X2[dx1: dx1+dx2]
+            result_dataset.x_train[i, 0: dx1] = X1[0: dx1]
+            result_dataset.x_train[i, dx1: dx1+dx2] = X2[dx1: dx1+dx2]
             result_dataset.y_train[i] = 1 if i1 == i2 else 0
 
     #
@@ -588,8 +588,8 @@ def create_audio2vec_signal_dataset(in_dataset: DatasetAudios, prob_self: float 
             dx1 = int( dim_x * p )
             dx2 = dim_x - dx1
             #
-            result_dataset.x_test[i][0: dx1] = X1[0: dx1]
-            result_dataset.x_test[i][dx1: dx1+dx2] = X2[dx1: dx1+dx2]
+            result_dataset.x_test[i, 0: dx1] = X1[0: dx1]
+            result_dataset.x_test[i, dx1: dx1+dx2] = X2[dx1: dx1+dx2]
             result_dataset.y_test[i] = 1 if i1 == i2 else 0
 
     #

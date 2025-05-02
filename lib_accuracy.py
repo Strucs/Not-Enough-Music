@@ -600,6 +600,7 @@ def calculate_unsupervized_clusters(
         else:
             unknown_pts.append( i )
 
+    """
     #
     predicted_unknown_pt_classes: list[list[tuple[int, float]]] = []
 
@@ -630,6 +631,40 @@ def calculate_unsupervized_clusters(
 
     # 1. Build predicted labels array
     predicted_labels = [cls_dist[0][0] for cls_dist in predicted_unknown_pt_classes]
+    """
+
+    predicted_labels = [0] * len(unknown_pts)
+
+    tmp: list[int] = [i for i in range(len(unknown_pts))]
+    crt_cls: int = 0
+
+    while len(tmp) > 0:
+
+        #
+        dsts: list[float] = [
+            distance_point_class(
+                embeddings=all_embeddings,
+                idx_class_pts=known_cluster_pts[crt_cls],
+                idx_unknown_pt=unknown_pts[p],
+                method="min"
+            )
+            for p in tmp
+        ]
+
+        #
+        ip: int = np.argmin(dsts)
+        idx: int = tmp.pop(ip)
+
+        #
+        predicted_labels[ idx ] = crt_cls
+
+        #
+        crt_cls += 1
+        #
+        if crt_cls >= len(nb_per_class):
+            crt_cls = 0
+
+    # Evaluation:
     true_labels      = [ y_all[i].item() for i in unknown_pts ]
 
     # 2. Report accuracy
@@ -639,27 +674,26 @@ def calculate_unsupervized_clusters(
 
     if plot:
 
-        # 3. 2D projection (reuse PCA)
-        proj2d = PCA(n_components=2).fit_transform(all_embeddings)
+        # 2D projection using t-SNE
+        tsne = TSNE(n_components=2, perplexity=30.0, learning_rate=200.0, max_iter=1000)
+        proj2d = tsne.fit_transform(all_embeddings)
 
-        # 4. Plot
         plt.figure(figsize=(8,6))
-        # Known
+        # Plot known seeds
         for c, idxs in enumerate(known_cluster_pts):
             pts = proj2d[idxs]
-            plt.scatter(pts[:,0], pts[:,1],
-                        marker='o', alpha=0.3,
-                        label=f"Known class {c}")
-        # Unknown (predicted)
+            label = class_names[c] if class_names else f"Known class {c}"
+            plt.scatter(pts[:,0], pts[:,1], marker='o', alpha=0.3, label=f"Known: {label}")
+        # Plot unknown points with predicted labels
         unknown_idx_arr = np.array(unknown_pts)
-        pred_arr        = np.array(predicted_labels)
+        pred_arr = np.array(predicted_labels)
         for c in set(pred_arr):
             sel = unknown_idx_arr[pred_arr == c]
             pts = proj2d[sel]
-            plt.scatter(pts[:,0], pts[:,1],
-                        marker='x', s=30,
-                        label=f"Predicted class {c}")
-        plt.title("Unsupervised Clustering: Known vs. Predicted")
+            label = class_names[c] if class_names else f"Predicted {c}"
+            plt.scatter(pts[:,0], pts[:,1], marker='x', s=30, label=f"Predicted: {label}")
+
+        plt.title("t-SNE Unsupervised Clustering: Known vs. Predicted")
         plt.xlabel("Dim 1")
         plt.ylabel("Dim 2")
         plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left")
