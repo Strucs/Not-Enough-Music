@@ -79,7 +79,8 @@ def calculate_top_k_accuracy(
     dataset: Dataset,
     model: nn.Module,
     k: int = 3, # Parameterize k for flexibility (Top-K)
-    batch_size: int = 1 # Add batch_size argument for optimization
+    batch_size: int = 1, # Add batch_size argument for optimization
+    dataset_part: str = "test"
 ) -> float:
 
     """
@@ -99,11 +100,20 @@ def calculate_top_k_accuracy(
 
     model = model.to( get_device() )
 
+    #
     try:
-        x_test, y_test = dataset.get_full_test()
+        if dataset_part == "test":
+            x_test, y_test = dataset.get_full_test()
+        elif dataset_part == "train":
+            x_test, y_test = dataset.get_full_train()
+        else:
+            print(f"Error: No dataset part `{dataset_part}`.")
+            return torch.empty((0, 2))
+    #
     except AttributeError:
         print("Error: The 'dataset' object must have a 'get_full_test' method.")
         return 0.0
+    #
     except Exception as e:
         print(f"Error getting test data: {e}")
         return 0.0
@@ -260,7 +270,8 @@ def calculate_pca_embeddings(
     batch_size: int = 64,
     plot: bool = True,
     class_names: Optional[list[str]] = None,
-    save_plot: Optional[str] = None
+    save_plot: Optional[str] = None,
+    dataset_part: str = "test"
 ) -> Tensor:
 
     model.eval()
@@ -271,8 +282,16 @@ def calculate_pca_embeddings(
         print("Error: The 'model' object must have a 'get_embedding' method.")
         return torch.empty((0, 2))
 
+    #
     try:
-        x_all, y_all = dataset.get_full_test()
+        if dataset_part == "test":
+            x_all, y_all = dataset.get_full_test()
+        elif dataset_part == "train":
+            x_all, y_all = dataset.get_full_train()
+        else:
+            print(f"Error: No dataset part `{dataset_part}`.")
+            return torch.empty((0, 2))
+    #
     except AttributeError:
         print("Error: The 'dataset' object must have a 'get_full_test' method.")
         return torch.empty((0, 2))
@@ -361,7 +380,8 @@ def calculate_tsne_embeddings(
     perplexity: float = 30.0,
     learning_rate: float = 200.0,
     class_names: Optional[list[str]] = None,
-    save_plot: Optional[str] = None
+    save_plot: Optional[str] = None,
+    dataset_part: str = "test"
 ) -> Tensor:
 
     model.eval()
@@ -372,8 +392,16 @@ def calculate_tsne_embeddings(
         print("Error: The 'model' object must have a 'get_embedding' method.")
         return torch.empty((0, 2))
 
+    #
     try:
-        x_all, y_all = dataset.get_full_test()
+        if dataset_part == "test":
+            x_all, y_all = dataset.get_full_test()
+        elif dataset_part == "train":
+            x_all, y_all = dataset.get_full_train()
+        else:
+            print(f"Error: No dataset part `{dataset_part}`.")
+            return torch.empty((0, 2))
+    #
     except AttributeError:
         print("Error: The 'dataset' object must have a 'get_full_test' method.")
         return torch.empty((0, 2))

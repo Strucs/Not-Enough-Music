@@ -39,7 +39,7 @@ class ASTClassification(nn.Module):
         #
         self.classification_module: ClassificationModule = ClassificationModule(
             embedding_dim=768,
-            nb_classes=10
+            nb_classes=self.nb_classes
         )
 
     #
