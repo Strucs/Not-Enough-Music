@@ -609,14 +609,14 @@ def create_audio2vec_signal_dataset(in_dataset: DatasetAudios = DatasetAudios(),
     #
     in_dataset.x_test = in_dataset.x_test.to( "cpu" )
     in_dataset.y_test = in_dataset.y_test.to( "cpu" )
-    in_dataset.x_train = in_dataset.x_train.to( get_device() )
+    in_dataset.x_train = in_dataset.x_train.to( "cpu" )
     in_dataset.y_train = in_dataset.y_train.to( "cpu" )
 
     #
-    result_dataset.x_test = torch.zeros( (nb_test, dim_x), dtype=dtype ).to( "cpu" )
-    result_dataset.y_test = torch.zeros( (nb_test, 2), dtype=torch.int ).to( "cpu" )
-    result_dataset.x_train = torch.zeros( (nb_train, dim_x), dtype=dtype ).to( "cpu" )
-    result_dataset.y_train = torch.zeros( (nb_train, 2), dtype=torch.int ).to( "cpu" )
+    result_dataset.x_test = result_dataset.x_test.to( "cpu" )
+    result_dataset.y_test = result_dataset.y_test.to( "cpu" )
+    result_dataset.x_train = result_dataset.x_train.to( "cpu" )
+    result_dataset.y_train = result_dataset.y_train.to( "cpu" )
 
     #
     return result_dataset
@@ -731,6 +731,18 @@ def create_audio2vec_img_dataset(in_dataset: DatasetImages | DatasetImagesFilter
             result_dataset.x_test[i, 0: dx1, :, :] = X1[0: dx1, :, :]
             result_dataset.x_test[i, dx1: dx1+dx2, :, :] = X2[dx1: dx1+dx2, :, :]
             result_dataset.y_test[i] = 1 if i1 == i2 else 0
+
+    #
+    in_dataset.x_test = in_dataset.x_test.to( "cpu" )
+    in_dataset.y_test = in_dataset.y_test.to( "cpu" )
+    in_dataset.x_train = in_dataset.x_train.to( "cpu" )
+    in_dataset.y_train = in_dataset.y_train.to( "cpu" )
+
+    #
+    result_dataset.x_test = result_dataset.x_test.to( "cpu" )
+    result_dataset.y_test = result_dataset.y_test.to( "cpu" )
+    result_dataset.x_train = result_dataset.x_train.to( "cpu" )
+    result_dataset.y_train = result_dataset.y_train.to( "cpu" )
 
     #
     return result_dataset
