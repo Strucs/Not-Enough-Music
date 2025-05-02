@@ -504,7 +504,7 @@ class DatasetAudios(Dataset):
 
 
 #
-def create_audio2vec_signal_dataset(in_dataset: DatasetAudios = DatasetAudios(), prob_self: float = 0.45, nb_train: int = 750, nb_test: int = 250) -> DatasetAudios:
+def create_audio2vec_signal_dataset(in_dataset: DatasetAudios = DatasetAudios(), prob_self: float = 0.45, nb_train: int = 1000, nb_test: int = 250) -> DatasetAudios:
 
     #
     result_dataset: DatasetAudios = DatasetAudios(load_from_path="")

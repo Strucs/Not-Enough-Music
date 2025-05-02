@@ -20,6 +20,7 @@ from lib_accuracy import calculate_top_k_accuracy
 from lib_accuracy import calculate_confusion_matrix
 from lib_accuracy import calculate_pca_embeddings
 from lib_accuracy import calculate_tsne_embeddings
+from lib_accuracy import calculate_unsupervized_clusters
 #
 from experience_lib import load_model
 
@@ -66,12 +67,19 @@ def main() -> None:
     print(f"CLASS_NAMES = {class_names}")
 
     #
-    calculate_top_k_accuracy(dataset=dataset, model=model, k=1, batch_size=1)
-    calculate_top_k_accuracy(dataset=dataset, model=model, k=3, batch_size=1)
+    if sys.argv[1].startswith("pre_train_"):
+        #
+        calculate_unsupervized_clusters(dataset=dataset, model=model, dataset_part="test")
+        calculate_unsupervized_clusters(dataset=dataset, model=model, dataset_part="train")
+    #
+    else:
+        #
+        calculate_top_k_accuracy(dataset=dataset, model=model, k=1, batch_size=1)
+        calculate_top_k_accuracy(dataset=dataset, model=model, k=3, batch_size=1)
 
-    calculate_confusion_matrix(dataset=dataset, model=model, batch_size=1, class_names=class_names)
-    calculate_pca_embeddings(dataset=dataset, model=model, batch_size=1, class_names=class_names)
-    calculate_tsne_embeddings(dataset=dataset, model=model, batch_size=1, class_names=class_names)
+        calculate_confusion_matrix(dataset=dataset, model=model, batch_size=1, class_names=class_names)
+        calculate_pca_embeddings(dataset=dataset, model=model, batch_size=1, class_names=class_names)
+        calculate_tsne_embeddings(dataset=dataset, model=model, batch_size=1, class_names=class_names)
 
 
 #

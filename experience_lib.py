@@ -18,7 +18,7 @@ from lib_device import get_device
 
 
 #
-def load_model() -> tuple[nn.Module, ld.Dataset]:
+def load_model(give_train_dataset: bool = True) -> tuple[nn.Module, ld.Dataset]:
 
 
     #
@@ -97,7 +97,10 @@ def load_model() -> tuple[nn.Module, ld.Dataset]:
         from lib_model_ast_classification import ASTClassification
 
         #
-        dataset = ld.create_audio2vec_signal_dataset()
+        if give_train_dataset:
+            dataset = ld.create_audio2vec_signal_dataset()
+        else:
+            dataset = ld.DatasetAudios()
         #
         model = ASTClassification(nb_classes = 2)
 
@@ -108,7 +111,10 @@ def load_model() -> tuple[nn.Module, ld.Dataset]:
         from model_angel1 import SimpleCNN1D
 
         #
-        dataset = ld.create_audio2vec_signal_dataset()
+        if give_train_dataset:
+            dataset = ld.create_audio2vec_signal_dataset()
+        else:
+            dataset = ld.DatasetAudios()
         #
         model = SimpleCNN1D(input_channels = len(dataset.get_batch_train(1)[0]), num_classes = 2)  # type: ignore
 
@@ -119,7 +125,10 @@ def load_model() -> tuple[nn.Module, ld.Dataset]:
         from model_angel2 import SimpleCNN1D  # type: ignore
 
         #
-        dataset = ld.create_audio2vec_signal_dataset()
+        if give_train_dataset:
+            dataset = ld.create_audio2vec_signal_dataset()
+        else:
+            dataset = ld.DatasetAudios()
         #
         model = SimpleCNN1D(input_channels = len(dataset.get_batch_train(1)[0]), num_classes = 2)  # type: ignore
 
@@ -132,7 +141,9 @@ def load_model() -> tuple[nn.Module, ld.Dataset]:
         #
         # dataset = ld.DatasetImages()  # type: ignore
         dataset = ld.DatasetImagesFiltered(px_height_to_keep = -1)  # type: ignore
-        dataset = ld.create_audio2vec_img_dataset(in_dataset=dataset)
+        #
+        if give_train_dataset:
+            dataset = ld.create_audio2vec_img_dataset(in_dataset=dataset)
         #
         model = Resnet(image_size = dataset.get_batch_train(1)[0].shape, num_classes = 2, resnet_version = sys.argv[1][len("pre_train_"):], pretrained= True)  # type: ignore
 
@@ -145,7 +156,9 @@ def load_model() -> tuple[nn.Module, ld.Dataset]:
         #
         # dataset = ld.DatasetImages()  # type: ignore
         dataset = ld.DatasetImagesFiltered(px_height_to_keep = -1, divisible_per = 64)  # type: ignore
-        dataset = ld.create_audio2vec_img_dataset(in_dataset=dataset)
+        #
+        if give_train_dataset:
+            dataset = ld.create_audio2vec_img_dataset(in_dataset=dataset)
         #
         model = SimpleVitClassifier(image_size = dataset.get_batch_train(1)[0].shape, num_classes = 2)  # type: ignore
 
@@ -158,7 +171,9 @@ def load_model() -> tuple[nn.Module, ld.Dataset]:
         #
         # dataset = ld.DatasetImages()  # type: ignore
         dataset = ld.DatasetImagesFiltered(px_height_to_keep = -1, divisible_per = 64)  # type: ignore
-        dataset = ld.create_audio2vec_img_dataset(in_dataset=dataset)
+        #
+        if give_train_dataset:
+            dataset = ld.create_audio2vec_img_dataset(in_dataset=dataset)
         #
         model = VitClassifier(image_size = dataset.get_batch_train(1)[0].shape, num_classes = 2)  # type: ignore
 

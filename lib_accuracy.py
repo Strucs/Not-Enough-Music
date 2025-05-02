@@ -478,3 +478,193 @@ def calculate_tsne_embeddings(
 
 
     return torch.from_numpy(reduced)
+
+
+
+#
+def distance_point_class( embeddings: list[np.ndarray], idx_class_pts: list[int], idx_unknown_pt: int, method: str = "avg" ) -> float:
+    #
+    distances: list[float] = []
+    #
+    for idx_class_pt in idx_class_pts:
+        #
+        distances.append(
+            np.sqrt( np.sum( (embeddings[idx_class_pt] - embeddings[idx_unknown_pt]) ** 2 ) )
+        )
+    #
+    if method == "min":
+        return min( distances ) if len(distances) > 0 else 0
+    elif method == "max":
+        return max( distances ) if len(distances) > 0 else 0
+    elif method == "avg":
+        return sum( distances ) / float(len(distances)) if len(distances) > 0 else 0
+    #
+    return 0
+
+
+
+
+@torch.no_grad()
+def calculate_unsupervized_clusters(
+    dataset: Dataset,
+    model: nn.Module,
+    batch_size: int = 64,
+    plot: bool = True,
+    class_names: Optional[list[str]] = None,
+    save_plot: Optional[str] = None,
+    dataset_part: str = "test",
+    known_prct: float = 0.1,
+    distances_to_each_class_method: str = "avg"
+) -> None:
+
+    model = model.eval()
+    device = get_device()
+    model = model.to(device)
+
+    if not hasattr(model, "get_embedding"):
+        print("Error: The 'model' object must have a 'get_embedding' method.")
+        return
+
+    #
+    try:
+        if dataset_part == "test":
+            x_all, y_all = dataset.get_full_test()
+        elif dataset_part == "train":
+            x_all, y_all = dataset.get_full_train()
+        else:
+            print(f"Error: No dataset part `{dataset_part}`.")
+            return
+    #
+    except AttributeError:
+        print("Error: The 'dataset' object must have a 'get_full_test' method.")
+        return
+
+    x_all = x_all.to(device)
+    y_all = y_all.to(device)
+
+    total_samples = len(x_all)
+    if total_samples == 0:
+        print("Warning: Test dataset is empty.")
+        return
+
+    embeddings: list[np.ndarray] = []
+    labels: list[np.ndarray] = []
+    for start in tqdm(range(0, total_samples, batch_size), desc="Extracting Embeddings for unsupervized clustering"):
+        end = min(start + batch_size, total_samples)
+        x_batch = x_all[start:end]
+        emb_batch = model.get_embedding(x_batch)    # type: ignore
+        embeddings.append(emb_batch.cpu().numpy())
+        labels.append(y_all[start:end].cpu().numpy())
+
+    #
+    nb_per_class: list[int] = []
+
+    #
+    cls: int
+
+    #
+    for i in range(len(y_all)):
+        #
+        cls = int(y_all[i].item())
+        #
+        if cls >= len(nb_per_class):
+            #
+            nb_per_class += [0] * ( cls - len(nb_per_class) )
+        #
+        nb_per_class[ cls ] += 1
+
+    #
+    nb_known_per_class: list[int] = [ int(float(nbpc) * known_prct) for nbpc in nb_per_class]
+    #
+    crt_nb_known_per_class: list[int] = [ 0 ] * len(nb_per_class)
+    #
+    known_cluster_pts: list[list[int]] = [ [] for _ in range(len(nb_per_class)) ]
+    #
+    unknown_pts: list[int] = []
+
+    #
+    for i in range(len(y_all)):
+        #
+        cls = int(y_all[i].item())
+        #
+        if crt_nb_known_per_class[ cls ] < nb_known_per_class[ cls ]:
+            #
+            crt_nb_known_per_class[ cls ] += 1
+            #
+            known_cluster_pts[ cls ].append( i )
+        #
+        else:
+            unknown_pts.append( i )
+
+    #
+    predicted_unknown_pt_classes: list[list[tuple[int, float]]] = []
+
+    #
+    for j in range( len(unknown_pts) ):
+
+        #
+        predicted_unknown_pt_classes.append( [] )
+        #
+        i = unknown_pts[j]
+
+        #
+        for c in range(len(nb_per_class)):
+
+            #
+            d: float = distance_point_class(
+                            embeddings=embeddings,
+                            idx_class_pts=known_cluster_pts[c],
+                            idx_unknown_pt=i,
+                            method=distances_to_each_class_method
+            )
+
+            #
+            predicted_unknown_pt_classes[j].append( (c, d) )
+
+        #
+        predicted_unknown_pt_classes[j] = sorted( predicted_unknown_pt_classes[j], key = lambda x: x[1] )
+
+    # Evaluation:
+
+    # 1. Build predicted labels array
+    predicted_labels = [cls_dist[0][0] for cls_dist in predicted_unknown_pt_classes]
+    true_labels      = [ y_all[i].item() for i in unknown_pts ]
+
+    # 2. Report accuracy
+    correct = sum(p == t for p, t in zip(predicted_labels, true_labels))
+    acc = correct / len(unknown_pts) if unknown_pts else 0.0
+    print(f"Unsupervised clustering accuracy on unknown pts: {correct}/{len(unknown_pts)} = {acc:.4f}")
+
+    if plot:
+
+        # 3. 2D projection (reuse PCA)
+        all_embeddings = np.vstack(embeddings)
+        proj2d = PCA(n_components=2).fit_transform(all_embeddings)
+
+        # 4. Plot
+        plt.figure(figsize=(8,6))
+        # Known
+        for c, idxs in enumerate(known_cluster_pts):
+            pts = proj2d[idxs]
+            plt.scatter(pts[:,0], pts[:,1],
+                        marker='o', alpha=0.3,
+                        label=f"Known class {c}")
+        # Unknown (predicted)
+        unknown_idx_arr = np.array(unknown_pts)
+        pred_arr        = np.array(predicted_labels)
+        for c in set(pred_arr):
+            sel = unknown_idx_arr[pred_arr == c]
+            pts = proj2d[sel]
+            plt.scatter(pts[:,0], pts[:,1],
+                        marker='x', s=30,
+                        label=f"Predicted class {c}")
+        plt.title("Unsupervised Clustering: Known vs. Predicted")
+        plt.xlabel("Dim 1")
+        plt.ylabel("Dim 2")
+        plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left")
+        plt.tight_layout()
+        if save_plot:
+            plt.savefig(save_plot)
+        else:
+            plt.show()
+        plt.close()
