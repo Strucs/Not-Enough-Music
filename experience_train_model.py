@@ -14,7 +14,7 @@ import numpy as np
 #
 from lib_training import train_simple_epochs_loop
 #
-from experience_lib import load_model
+from experience_lib import load_model, load_dataset
 #
 import lib_loss as ll
 
@@ -37,19 +37,12 @@ def main() -> None:
         raise UserWarning("please indicate the class type you want to train")
 
     #
-    model: nn.Module
-    #
-    dataset: ld.Dataset
-    #
     model_saving_folder: str = f"model_weights/{sys.argv[1]}/"
 
     #
-    model, dataset = load_model()
-
+    model: nn.Module = load_model(model_name = sys.argv[1], model_weights_path = sys.argv[2] if len(sys.argv) > 2 else "")
     #
-    if model is None or dataset is None:
-        #
-        raise UserWarning(f"model or dataset not correctly loaded...\nModel = {model}\nDataset = {dataset}")
+    dataset: ld.Dataset = load_dataset(model_name = sys.argv[1], give_train_dataset=False)
 
     #
     loss_fn: nn.Module = nn.CrossEntropyLoss()
@@ -57,21 +50,49 @@ def main() -> None:
     loss_fn = ll.FocalLoss(gamma = 2)
 
     #
-    train_simple_epochs_loop(
-        dataset = dataset,
-        model = model,
-        loss_fn = loss_fn,
-        optimizer_type = "adam",
-        optimizer_kwargs = {
-            "params": model.parameters(),
-            "lr": 0.001
-        },
-        nb_epochs = 100,
-        batch_size = -1,
-        batch_parallel_calcul = 1,
-        model_saving_folder = model_saving_folder,
-        model_save_epochs_steps = 1
-    )
+    if sys.argv[1].startswith("pre_train_"):
+
+        #
+        for _ in range(10):
+
+            #
+            crt_dataset: ld.Dataset = load_dataset(model_name = sys.argv[1], give_train_dataset=True, from_dataset = dataset)
+
+            #
+            train_simple_epochs_loop(
+                dataset = crt_dataset,
+                model = model,
+                loss_fn = loss_fn,
+                optimizer_type = "adam",
+                optimizer_kwargs = {
+                    "params": model.parameters(),
+                    "lr": 0.001
+                },
+                nb_epochs = 2,
+                batch_size = -1,
+                batch_parallel_calcul = 1,
+                model_saving_folder = model_saving_folder,
+                model_save_epochs_steps = 1
+            )
+
+    else:
+
+        #
+        train_simple_epochs_loop(
+            dataset = dataset,
+            model = model,
+            loss_fn = loss_fn,
+            optimizer_type = "adam",
+            optimizer_kwargs = {
+                "params": model.parameters(),
+                "lr": 0.001
+            },
+            nb_epochs = 100,
+            batch_size = -1,
+            batch_parallel_calcul = 1,
+            model_saving_folder = model_saving_folder,
+            model_save_epochs_steps = 1
+        )
 
 #
 if __name__ == "__main__":

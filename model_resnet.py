@@ -6,7 +6,7 @@ import torchvision.models as models  # type: ignore
 
 #
 class Resnet(nn.Module):
-    def __init__(self, image_size: tuple[int, int], num_classes: int, resnet_version: str = "resnet18", pretrained: bool = True) -> None:
+    def __init__(self, num_classes: int, resnet_version: str = "resnet18", pretrained: bool = True, image_size: tuple[int, int] = (192, 320)) -> None:
         """
         Initializes a ResNet model adapted for classification.
 

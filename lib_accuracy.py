@@ -483,6 +483,7 @@ def calculate_tsne_embeddings(
 
 #
 def distance_point_class( embeddings: list[np.ndarray], idx_class_pts: list[int], idx_unknown_pt: int, method: str = "avg" ) -> float:
+
     #
     distances: list[float] = []
     #
@@ -557,6 +558,9 @@ def calculate_unsupervized_clusters(
         labels.append(y_all[start:end].cpu().numpy())
 
     #
+    all_embeddings = np.vstack(embeddings)
+
+    #
     nb_per_class: list[int] = []
 
     #
@@ -569,7 +573,7 @@ def calculate_unsupervized_clusters(
         #
         if cls >= len(nb_per_class):
             #
-            nb_per_class += [0] * ( cls - len(nb_per_class) )
+            nb_per_class += [0] * ( 1 + cls - len(nb_per_class) )
         #
         nb_per_class[ cls ] += 1
 
@@ -604,17 +608,15 @@ def calculate_unsupervized_clusters(
 
         #
         predicted_unknown_pt_classes.append( [] )
-        #
-        i = unknown_pts[j]
 
         #
         for c in range(len(nb_per_class)):
 
             #
             d: float = distance_point_class(
-                            embeddings=embeddings,
+                            embeddings=all_embeddings,
                             idx_class_pts=known_cluster_pts[c],
-                            idx_unknown_pt=i,
+                            idx_unknown_pt=unknown_pts[j],
                             method=distances_to_each_class_method
             )
 
@@ -638,7 +640,6 @@ def calculate_unsupervized_clusters(
     if plot:
 
         # 3. 2D projection (reuse PCA)
-        all_embeddings = np.vstack(embeddings)
         proj2d = PCA(n_components=2).fit_transform(all_embeddings)
 
         # 4. Plot

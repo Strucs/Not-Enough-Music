@@ -7,7 +7,7 @@ import torch.nn as nn
 # Définition du modèle CNN 1D
 class SimpleCNN1D(nn.Module):
 
-    def __init__(self, input_channels, num_classes) -> None:
+    def __init__(self, num_classes, input_channels: int = 675808) -> None:
 
         super(SimpleCNN1D, self).__init__()
 

@@ -10,7 +10,7 @@ import torch.nn as nn
 class SimpleCNN1D(nn.Module):
 
     #
-    def __init__(self, input_channels, num_classes) -> None:
+    def __init__(self, num_classes, input_channels: int = 675808) -> None:
         super(SimpleCNN1D, self).__init__()
 
         self.conv1 = nn.Conv1d(in_channels=input_channels, out_channels=16, kernel_size=3, stride=1, padding=1)

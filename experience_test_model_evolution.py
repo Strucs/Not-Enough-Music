@@ -21,7 +21,7 @@ from lib_accuracy import calculate_confusion_matrix
 from lib_accuracy import calculate_pca_embeddings
 from lib_accuracy import calculate_tsne_embeddings
 #
-from experience_lib import load_model
+from experience_lib import load_model, load_dataset
 #
 from lib_device import get_device
 
@@ -48,16 +48,9 @@ def main() -> None:
         del sys.argv[2]
 
     #
-    model: nn.Module
+    model: nn.Module = load_model(model_name = sys.argv[1], model_weights_path = sys.argv[2] if len(sys.argv) > 2 else "")
     #
-    dataset: ld.Dataset
-    #
-    model, dataset = load_model()
-
-    #
-    if model is None or dataset is None:
-        #
-        raise UserWarning(f"model or dataset not correctly loaded...\nModel = {model}\nDataset = {dataset}")
+    dataset: ld.Dataset = load_dataset(model_name = sys.argv[1])
 
     #
     class_names: Optional[list[str]] = None

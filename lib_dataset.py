@@ -45,7 +45,7 @@ class Dataset:
         self.y_test: Tensor = Tensor([0])
 
     #
-    def get_full_train(self, random_seed: Optional[int] = None) -> tuple[Tensor, Tensor]:
+    def get_full_train(self) -> tuple[Tensor, Tensor]:
 
         #
         rd_permutation: list[int] = get_random_perm(self.nb_train)
@@ -54,7 +54,7 @@ class Dataset:
         return self.x_train[rd_permutation], self.y_train[rd_permutation]
 
     #
-    def get_full_test(self, random_seed: Optional[int] = None) -> tuple[Tensor, Tensor]:
+    def get_full_test(self) -> tuple[Tensor, Tensor]:
 
         #
         rd_permutation: list[int] = get_random_perm(self.nb_test)
@@ -63,7 +63,7 @@ class Dataset:
         return self.x_test[rd_permutation], self.y_test[rd_permutation]
 
     #
-    def get_batch_train(self, batch_size: int, random_seed: Optional[int] = None) -> tuple[Tensor, Tensor]:
+    def get_batch_train(self, batch_size: int) -> tuple[Tensor, Tensor]:
 
         #
         if batch_size > self.nb_train:
@@ -78,7 +78,7 @@ class Dataset:
         return self.x_train[rd_permutation[:batch_size]], self.y_train[rd_permutation[:batch_size]]
 
     #
-    def get_batch_test(self, batch_size: int, random_seed: Optional[int] = None) -> tuple[Tensor, Tensor]:
+    def get_batch_test(self, batch_size: int) -> tuple[Tensor, Tensor]:
 
         #
         if batch_size > self.nb_test:
@@ -97,7 +97,7 @@ class Dataset:
 class DatasetImages(Dataset):
 
     #
-    def __init__(self, dataset_split_ratio: float = 0.75, seed: Optional[int] = None, load_from_path: str = "data/images_original/") -> None:
+    def __init__(self, dataset_split_ratio: float = 0.75, load_from_path: str = "data/images_original/") -> None:
 
         #
         super().__init__()
@@ -125,7 +125,6 @@ class DatasetImages(Dataset):
         #
         if load_from_path != "":
             #
-            print(f"Load dataset from path : `{load_from_path}`")
             self.load_dataset( load_from_path )
 
     #
@@ -140,7 +139,7 @@ class DatasetImages(Dataset):
 
 
         #
-        print("Loading dataset")
+        print(f"Load dataset from path : `{base_path}`...")
 
         #
         self.class_names = [path for path in os.listdir(base_path) if not path.startswith(".")]
@@ -220,7 +219,7 @@ class DatasetImages(Dataset):
 class DatasetImagesFiltered(Dataset):
 
     #
-    def __init__(self, px_height_to_keep: int, divisible_per: int = 18, dataset_split_ratio: float = 0.75, seed: Optional[int] = None, load_from_path: str = "data/images_original/") -> None:
+    def __init__(self, px_height_to_keep: int, divisible_per: int = 18, dataset_split_ratio: float = 0.75, load_from_path: str = "data/images_original/") -> None:
 
         #
         super().__init__()
@@ -251,7 +250,7 @@ class DatasetImagesFiltered(Dataset):
 
         #
         if load_from_path != "":
-            print(f"Load dataset from path : `{load_from_path}`")
+            #
             self.load_dataset( load_from_path )
 
     #
@@ -265,7 +264,7 @@ class DatasetImagesFiltered(Dataset):
         i_test: int = 0
 
         #
-        print("Loading dataset")
+        print(f"Load dataset from path : `{base_path}`...")
 
         #
         self.class_names = [path for path in os.listdir(base_path) if not path.startswith(".")]
@@ -319,7 +318,6 @@ class DatasetImagesFiltered(Dataset):
         bxt: int = 251
         by: int = 54
         bx: int = 35
-        # by = byt - self.px_height_to_keep
 
         #
         if self.px_height_to_keep > 0:
@@ -331,9 +329,6 @@ class DatasetImagesFiltered(Dataset):
 
         w: int = bxt - bx
         h: int = byt - by
-
-        #
-        # print(f"DEBUG | w = {w} | h = {h} | bx = {bx} | bxt = {bxt} | by = {by} | byt = {byt}")
 
         #
         self.x_train = torch.zeros( (self.nb_train, 3, w, h), dtype=torch.float32 )
@@ -348,17 +343,8 @@ class DatasetImagesFiltered(Dataset):
             img = torchvision.io.read_image( self.train_images[i_train] )
 
             #
-            # print(f"DEBUG | {img.shape}")
-
-            #
-            # plot_rgb_image(img[:3, :, :].permute(1, 2, 0).numpy())
-
-            #
             self.x_train[i_train] = img[:3, bx:bxt, by:byt] / 255.0
             self.y_train[i_train] = self.train_labels[i_train]
-
-            #
-            # plot_rgb_image(self.x_train[i_train].permute(1, 2, 0).numpy())
 
             #
             loading_bar.update(1)
@@ -379,7 +365,7 @@ class DatasetImagesFiltered(Dataset):
 class DatasetAudios(Dataset):
 
     #
-    def __init__(self, dataset_split_ratio: float = 0.75, seed: Optional[int] = None, load_from_path: str = "data/genres_original/") -> None:
+    def __init__(self, dataset_split_ratio: float = 0.75, load_from_path: str = "data/genres_original/") -> None:
 
         #
         super().__init__()
@@ -409,7 +395,7 @@ class DatasetAudios(Dataset):
 
         #
         if load_from_path != "":
-            print(f"Load dataset from path : `{load_from_path}`")
+            #
             self.load_dataset( load_from_path )
 
     #
@@ -423,7 +409,7 @@ class DatasetAudios(Dataset):
         i_test: int = 0
 
         #
-        print("Loading dataset")
+        print(f"Load dataset from path : `{base_path}`...")
 
         #
         self.class_names = [path for path in os.listdir(base_path) if not path.startswith(".")]
@@ -504,7 +490,7 @@ class DatasetAudios(Dataset):
 
 
 #
-def create_audio2vec_signal_dataset(in_dataset: DatasetAudios = DatasetAudios(), prob_self: float = 0.45, nb_train: int = 1000, nb_test: int = 250) -> DatasetAudios:
+def create_audio2vec_signal_dataset(in_dataset: DatasetAudios, prob_self: float = 0.45, nb_train: int = 1000, nb_test: int = 250) -> DatasetAudios:
 
     #
     result_dataset: DatasetAudios = DatasetAudios(load_from_path="")
@@ -628,7 +614,7 @@ def create_audio2vec_signal_dataset(in_dataset: DatasetAudios = DatasetAudios(),
 
 
 #
-def create_audio2vec_img_dataset(in_dataset: DatasetImages | DatasetImagesFiltered = DatasetImages(), prob_self: float = 0.45, nb_train: int = 5000, nb_test: int = 200) -> DatasetImages:
+def create_audio2vec_img_dataset(in_dataset: DatasetImages | DatasetImagesFiltered, prob_self: float = 0.45, nb_train: int = 5000, nb_test: int = 200) -> DatasetImages:
 
     #
     result_dataset: DatasetImages = DatasetImages(load_from_path="")

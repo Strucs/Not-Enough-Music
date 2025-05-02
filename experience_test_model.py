@@ -22,7 +22,7 @@ from lib_accuracy import calculate_pca_embeddings
 from lib_accuracy import calculate_tsne_embeddings
 from lib_accuracy import calculate_unsupervized_clusters
 #
-from experience_lib import load_model
+from experience_lib import load_model, load_dataset
 
 
 
@@ -44,16 +44,9 @@ def main() -> None:
         raise UserWarning("please indicate the class type you want to train")
 
     #
-    model: nn.Module
+    model: nn.Module = load_model(model_name = sys.argv[1], model_weights_path = sys.argv[2] if len(sys.argv) > 2 else "")
     #
-    dataset: ld.Dataset
-    #
-    model, dataset = load_model()
-
-    #
-    if model is None or dataset is None:
-        #
-        raise UserWarning(f"model or dataset not correctly loaded...\nModel = {model}\nDataset = {dataset}")
+    dataset: ld.Dataset = load_dataset(model_name = sys.argv[1], give_train_dataset = False)
 
     #
     class_names: Optional[list[str]] = None
