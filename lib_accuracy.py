@@ -108,7 +108,7 @@ def calculate_top_k_accuracy(
             x_test, y_test = dataset.get_full_train()
         else:
             print(f"Error: No dataset part `{dataset_part}`.")
-            return torch.empty((0, 2))
+            return 0.0
     #
     except AttributeError:
         print("Error: The 'dataset' object must have a 'get_full_test' method.")
@@ -482,7 +482,7 @@ def calculate_tsne_embeddings(
 
 
 #
-def distance_point_class( embeddings: list[np.ndarray], idx_class_pts: list[int], idx_unknown_pt: int, method: str = "avg" ) -> float:
+def distance_point_class( embeddings: np.ndarray, idx_class_pts: list[int], idx_unknown_pt: int, method: str = "avg" ) -> float:
 
     #
     distances: list[float] = []
@@ -652,7 +652,7 @@ def calculate_unsupervized_clusters(
         ]
 
         #
-        ip: int = np.argmin(dsts)
+        ip: int = int(np.argmin(dsts))
         idx: int = tmp.pop(ip)
 
         #
