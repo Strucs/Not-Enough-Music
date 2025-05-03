@@ -10,7 +10,7 @@ from lib_training import save_model, OPTIMIZERS
 
 from experience_lib import load_model, load_dataset
 
-from lib_dataset import SimCLRDataset, AudioAugmentation, Dataset
+from lib_dataset import SimCLRDataset, AudioAugmentation, Dataset, ImageAugmentation
 from lib_sim_clr import YourSimCLRModel, NTXentLoss
 
 
@@ -122,16 +122,18 @@ if __name__ == "__main__":
 
     # --- Example Usage ---
     # 1. Load your base model (without projection head)
-    model_name: str = "AST_classif_1"
-    base_model: nn.Module = load_model("AST_classif_1") # Your function
-    embedding_dim: int = 768 # Get embedding dimension from your base_model configuration
+    model_name: str = "simple_vit"
+    base_model: nn.Module = load_model(model_name) # Your function
+    embedding_dim: int = 1000
+    # AST_classif_1 = 768 | vit = 1000
 
     # 2. Create the SimCLR model wrapper
     simclr_model: YourSimCLRModel = YourSimCLRModel(base_model, embedding_dim)
 
     # 3. Prepare the dataset and dataloader
-    original_dataset: Dataset = load_dataset("AST_classif_1") # Your function
-    augmentation: AudioAugmentation = AudioAugmentation(sample_rate=original_dataset.sampling_rate) # Or Spectrogram augmentation
+    original_dataset: Dataset = load_dataset(model_name) # Your function
+    # augmentation: AudioAugmentation = AudioAugmentation(sample_rate=original_dataset.sampling_rate) # Or Spectrogram augmentation
+    augmentation: ImageAugmentation = ImageAugmentation(input_size=(192, 320))
     simclr_dataset: SimCLRDataset = SimCLRDataset(original_dataset.x_train, augmentation)
 
     # 4. Define loss and optimizer
@@ -145,8 +147,8 @@ if __name__ == "__main__":
         loss_fn=simclr_loss,
         optimizer_type="adam", #
         optimizer_kwargs=simclr_optimizer_kwargs,
-        nb_epochs=100,
-        batch_size=8, # Adjust based on memory
-        model_saving_folder="model_weights/simclr_audio/", # Example path
+        nb_epochs=30,
+        batch_size=16, # Adjust based on memory
+        model_saving_folder=f"model_weights/simclr_{model_name}/",
         model_save_epochs_steps=1
     )

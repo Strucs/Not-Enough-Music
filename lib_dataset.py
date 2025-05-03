@@ -8,7 +8,9 @@ import torch
 from torch import Tensor
 import torchvision  # type: ignore
 import torchaudio  # type: ignore
+import torch.nn.functional as F # type: ignore
 import torchaudio.transforms as T  # type: ignore
+import torchvision.transforms as transforms # type: ignore
 from torch.utils.data import Dataset as TorchDataset
 #from torchvision.io import read_image
 #
@@ -1017,7 +1019,73 @@ class ImageSpectrogramAugmentation:
 
         return final_spectrogram
 
+# --- NEW: Image Augmentation (Operates directly on Image Tensors) ---
+class ImageAugmentation:
+    def __init__(
+        self,
+        input_size: tuple[int, int] = (224, 224), # Target (height, width) after augmentation
+        color_jitter_strength: float = 0.4,
+        probability_random_horizontal_flip: float = 0.5,
+        probability_random_apply: float = 0.5, # Probability to apply a subset of transforms
+        # Add more parameters for other transforms as needed
+    ):
+        self.input_size = input_size
+        self.color_jitter_strength = color_jitter_strength
+        self.probability_random_horizontal_flip = probability_random_horizontal_flip
+        self.probability_random_apply = probability_random_apply
 
+
+        # Define a list of potential transforms to apply randomly
+        self.transforms = [
+            transforms.RandomHorizontalFlip(p=self.probability_random_horizontal_flip),
+            transforms.ColorJitter(
+                brightness=self.color_jitter_strength,
+                contrast=self.color_jitter_strength,
+                saturation=self.color_jitter_strength,
+                hue=self.color_jitter_strength / 3
+            ),
+            # Add other transforms here, e.g.:
+            # transforms.RandomRotation(degrees=30),
+            # transforms.RandomAffine(degrees=0, translate=(0.1, 0.1)),
+        ]
+
+        # Define the main augmentation pipeline
+        # RandomResizedCrop is crucial for SimCLR-like image training
+        self.transform_pipeline = transforms.Compose([
+            # Input to RandomResizedCrop is expected to be [C, H, W] Tensor or PIL Image
+            transforms.RandomResizedCrop(
+                size=self.input_size,
+                scale=(0.08, 1.0), # Typical SimCLR scale range
+                ratio=(0.75, 1.3333), # Typical aspect ratio range
+            ),
+            # Use RandomApply to randomly apply a subset of other transforms
+            transforms.RandomApply(self.transforms, p=self.probability_random_apply),
+            # Add Gaussian Blur - common in SimCLR
+            transforms.GaussianBlur(kernel_size=self.input_size[0]//10, sigma=(0.1, 2.0)), # Adjust kernel size based on input size
+            # Optional: Add more transforms like Solarization, etc.
+            # transforms.RandomSolarize(threshold=128, p=0.5),
+            # Ensure the tensor is in the correct format and range [0, 1] (should be after loading)
+            # Normalization is typically applied after augmentation if needed by the model
+            # transforms.Normalize(mean=[...], std=[...])
+        ])
+
+
+    def __call__(self, image: Tensor) -> Tensor:
+        """
+        Args:
+            image (Tensor): Input image tensor, expected shape [C, H, W] and float [0, 1].
+        Returns:
+            Tensor: Augmented image tensor, shape [C, input_size[0], input_size[1]].
+        """
+        # Ensure input is a tensor and in the correct format (float [0, 1])
+        if not isinstance(image, Tensor):
+             raise TypeError(f"Input should be a torch.Tensor, but got {type(image)}")
+        # Assuming input is already float [0, 1] from your dataset loading
+
+        # Apply the augmentation pipeline
+        augmented_image = self.transform_pipeline(image)
+
+        return augmented_image
 
 # --- SimCLR Dataset ---
 # This dataset takes an existing dataset (like DatasetAudios)
