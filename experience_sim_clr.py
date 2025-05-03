@@ -122,9 +122,9 @@ if __name__ == "__main__":
 
     # --- Example Usage ---
     # 1. Load your base model (without projection head)
-    model_name: str = "simple_vit"
+    model_name: str = "AST_classif_1"
     base_model: nn.Module = load_model(model_name) # Your function
-    embedding_dim: int = 1000
+    embedding_dim: int = 768
     # AST_classif_1 = 768 | vit = 1000
 
     # 2. Create the SimCLR model wrapper
@@ -132,8 +132,8 @@ if __name__ == "__main__":
 
     # 3. Prepare the dataset and dataloader
     original_dataset: Dataset = load_dataset(model_name) # Your function
-    # augmentation: AudioAugmentation = AudioAugmentation(sample_rate=original_dataset.sampling_rate) # Or Spectrogram augmentation
-    augmentation: ImageAugmentation = ImageAugmentation(input_size=(192, 320))
+    augmentation: AudioAugmentation = AudioAugmentation(sample_rate=original_dataset.sampling_rate)
+    # augmentation: ImageAugmentation = ImageAugmentation(input_size=(192, 320))
     simclr_dataset: SimCLRDataset = SimCLRDataset(original_dataset.x_train, augmentation)
 
     # 4. Define loss and optimizer
@@ -147,8 +147,8 @@ if __name__ == "__main__":
         loss_fn=simclr_loss,
         optimizer_type="adam", #
         optimizer_kwargs=simclr_optimizer_kwargs,
-        nb_epochs=30,
-        batch_size=16, # Adjust based on memory
+        nb_epochs=100,
+        batch_size=8, # Adjust based on memory
         model_saving_folder=f"model_weights/simclr_{model_name}/",
-        model_save_epochs_steps=1
+        model_save_epochs_steps=2
     )

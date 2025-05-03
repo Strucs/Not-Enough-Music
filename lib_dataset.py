@@ -806,15 +806,12 @@ class AudioAugmentation:
 
         # Define a set of potential time-domain transformations with probabilities
         self.transforms = [
-            (T.Vol(gain=random.uniform(0.2, 1.5), gain_type="amplitude"), 0.8), # Random Gain (80% chance)
-            (T.PitchShift(sample_rate=sample_rate, n_steps=random.uniform(-4, 4)), 0.5), # Pitch Shift (50% chance)
-            (T.TimeStretch(hop_length=128, n_freq=201, rate=random.uniform(0.8, 1.2)), 0.5), # Time Stretch (50% chance)
-            (T.Roll(rolls=(int(random.randint(-self.target_length // 10, self.target_length // 10)),)), 0.3), # Random Roll (30% chance)
-            # Add white noise
-            (lambda w: w + torch.randn_like(w) * 0.005 * random.uniform(0.5, 1.5), 0.5), # Add Noise (50% chance)
-            # Polarity Inversion
-            (lambda w: w * -1 if random.random() > 0.5 else w, 0.2), # Polarity Inversion (20% chance)
-            # Add more transforms as needed
+            # Vol: apply Vol transform with random gain
+            (lambda w: T.Vol(gain=random.uniform(0.2, 1.5), gain_type="amplitude")(w), 0.8), # Keep this lambda for random gain
+            # Add white noise (already a lambda)
+            (lambda w: w + torch.randn_like(w) * 0.005 * random.uniform(0.5, 1.5), 0.5),
+            # Polarity Inversion (already a lambda)
+            (lambda w: w * -1 if random.random() > 0.5 else w, 0.2),
         ]
 
     def _apply_random_transforms(self, waveform: Tensor) -> Tensor:
@@ -825,14 +822,12 @@ class AudioAugmentation:
                 try:
                     if isinstance(transform, T.TimeStretch):
                          # TimeStretch might change length, apply before fixed-length processing
-                         augmented_waveform = transform(augmented_waveform.unsqueeze(0)).squeeze(0) # TimeStretch expects [channel, time]
+                         augmented_waveform = transform(augmented_waveform.unsqueeze(0), random.uniform(0.8, 1.2)).squeeze(0) # TimeStretch expects [channel, time]
                     elif isinstance(transform, T.PitchShift):
                          # PitchShift also expects [channel, time]
                          augmented_waveform = transform(augmented_waveform.unsqueeze(0), int(random.uniform(-4, 4))).squeeze(0) # Pass n_steps dynamically
                     elif isinstance(transform, T.Vol):
                          augmented_waveform = transform(augmented_waveform, random.uniform(0.2, 1.5)).squeeze(0) # Pass gain dynamically
-                    elif isinstance(transform, T.Roll):
-                         augmented_waveform = transform(augmented_waveform, (int(random.randint(-self.target_length // 10, self.target_length // 10)),)).squeeze(0) # Pass rolls dynamically
                     else:
                          # Assume other transforms work on [time] or [channel, time] and handle accordingly
                          augmented_waveform = transform(augmented_waveform)

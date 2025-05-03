@@ -44,9 +44,13 @@ def main() -> None:
         raise UserWarning("please indicate the class type you want to train")
 
     #
-    model: nn.Module = load_model(model_name = sys.argv[1], model_weights_path = sys.argv[2] if len(sys.argv) > 2 else "")
+    model_name: str = sys.argv[1]
+    model_weights_path: str = sys.argv[2] if len(sys.argv) > 2 else ""
+
     #
-    dataset: ld.Dataset = load_dataset(model_name = sys.argv[1], give_train_dataset = False)
+    model: nn.Module = load_model(model_name = model_name, model_weights_path = model_weights_path)
+    #
+    dataset: ld.Dataset = load_dataset(model_name = model_name, give_train_dataset = False)
 
     #
     class_names: Optional[list[str]] = None
@@ -60,7 +64,7 @@ def main() -> None:
     print(f"CLASS_NAMES = {class_names}")
 
     #
-    if sys.argv[1].startswith("pre_train_"):
+    if sys.argv[1].startswith("pre_train_") or "simclr" in model_weights_path:
         #
         calculate_unsupervized_clusters(dataset=dataset, model=model, dataset_part="test")
         calculate_unsupervized_clusters(dataset=dataset, model=model, dataset_part="train")
